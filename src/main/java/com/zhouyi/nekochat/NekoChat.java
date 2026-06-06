@@ -1,6 +1,7 @@
 package com.zhouyi.nekochat;
 
 import com.zhouyi.nekochat.commands.CBanCommand;
+import com.zhouyi.nekochat.commands.CWhitelistCommand;
 import com.zhouyi.nekochat.commands.MuteCommand;
 import com.zhouyi.nekochat.commands.PTitleCommand;
 import com.zhouyi.nekochat.commands.UnmuteCommand;
@@ -60,6 +61,12 @@ public class NekoChat extends JavaPlugin {
         if (unmuteCmd != null) {
             unmuteCmd.setExecutor(new UnmuteCommand(this));
             unmuteCmd.setTabCompleter(new UnmuteCommand(this));
+        }
+
+        var cwhitelistCmd = getCommand("cwhitelist");
+        if (cwhitelistCmd != null) {
+            cwhitelistCmd.setExecutor(new CWhitelistCommand(this));
+            cwhitelistCmd.setTabCompleter(new CWhitelistCommand(this));
         }
 
         // 注册事件监听

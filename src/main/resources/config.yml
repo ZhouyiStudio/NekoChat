@@ -43,6 +43,10 @@ banned-words:
   - "motherfucker"
 
 # === 服务器宣传检测 ===
-# 开启后，聊天消息中出现 IP 地址或外站域名（非 *.3d3k.org）将被拦截
+# 开启后，聊天消息中出现 IP 地址或外站域名将被拦截
 server-ad-check: true
 server-ad-message: "&c请勿宣传其他服务器！"
+# 宣传检测白名单（包含这些关键词的消息不会被拦截）
+server-ad-whitelist:
+  - "3d3k.org"
+  - "3d3k.discourse.group"

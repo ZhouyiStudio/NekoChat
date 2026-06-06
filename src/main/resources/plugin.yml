@@ -22,6 +22,10 @@ commands:
     description: 解除禁言
     usage: /unmute <玩家>
     permission: nekochat.mute
+  cwhitelist:
+    description: 管理宣传检测白名单
+    usage: /cwhitelist add <词汇> | /cwhitelist remove <词汇> | /cwhitelist list
+    permission: nekochat.cban
 
 permissions:
   nekochat.ptitle:
