@@ -7,6 +7,7 @@ import com.zhouyi.nekochat.commands.NChatCommand;
 import com.zhouyi.nekochat.commands.PTitleCommand;
 import com.zhouyi.nekochat.commands.UnmuteCommand;
 import com.zhouyi.nekochat.listeners.ChatListener;
+import com.zhouyi.nekochat.listeners.ServerMessageListener;
 import com.zhouyi.nekochat.managers.CBanManager;
 import com.zhouyi.nekochat.managers.MuteManager;
 import com.zhouyi.nekochat.managers.TitleManager;
