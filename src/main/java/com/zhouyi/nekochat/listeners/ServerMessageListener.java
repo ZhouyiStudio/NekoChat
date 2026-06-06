@@ -1,15 +1,16 @@
 package com.zhouyi.nekochat.listeners;
 
 import com.zhouyi.nekochat.NekoChat;
-import io.papermc.paper.event.message.ServerMessageEvent;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.server.ServerCommandEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 /**
- * 监听服务器消息（/say、控制台发送等），自动渲染 URL 和颜色代码
+ * 监听 /say 命令，将服务器消息中的 URL 转为可点击并解析 & 颜色代码
  */
 public class ServerMessageListener implements Listener {
 
@@ -20,22 +21,34 @@ public class ServerMessageListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onServerMessage(ServerMessageEvent event) {
-        // 不处理系统内部消息（如插件日志、后台输出等）
-        // ServerMessageEvent 默认只处理发送给玩家的服务器消息（/say 等）
-        Component original = event.message();
-        String plain = PlainTextComponentSerializer.plainText().serialize(original);
+    public void onServerCommand(ServerCommandEvent event) {
+        String cmd = event.getCommand().trim();
+        if (!cmd.toLowerCase().startsWith("say ")) return;
 
-        // 检查是否包含 URL 或 & 颜色代码
-        boolean hasUrl = NekoChat.URL_PATTERN.matcher(plain).find();
-        boolean hasColor = plain.contains("&");
-
-        if (!hasUrl && !hasColor) {
-            return; // 无需处理
-        }
+        String message = cmd.substring(4).trim();
+        if (message.isEmpty()) return;
 
         // 处理消息：解析 & 颜色代码 + URL 转可点击
-        Component processed = plugin.processMessage(plain);
-        event.message(processed);
+        Component processed = plugin.processMessage(message);
+
+        // 取消原命令，手动广播
+        event.setCancelled(true);
+        Bukkit.broadcast(processed);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
+        String cmd = event.getMessage().trim();
+        if (!cmd.toLowerCase().startsWith("/say ")) return;
+
+        String message = cmd.substring(5).trim();
+        if (message.isEmpty()) return;
+
+        // 处理消息：解析 & 颜色代码 + URL 转可点击
+        Component processed = plugin.processMessage(message);
+
+        // 取消原命令，手动广播
+        event.setCancelled(true);
+        Bukkit.broadcast(processed);
     }
 }
