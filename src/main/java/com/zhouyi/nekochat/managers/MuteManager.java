@@ -16,6 +16,8 @@ public class MuteManager {
     private final NekoChat plugin;
     // UUID -> 解禁时间戳 (毫秒), -1 表示永久禁言
     private final Map<UUID, Long> mutedPlayers = new HashMap<>();
+    // UUID -> 禁言原因
+    private final Map<UUID, String> muteReasons = new HashMap<>();
     private File dataFile;
     private FileConfiguration data;
 
@@ -28,10 +30,16 @@ public class MuteManager {
      * 禁言玩家
      * @param player 目标玩家
      * @param duration 持续时间（秒），-1 表示永久
+     * @param reason 禁言原因（null 或空串则使用默认提示）
      */
-    public void mute(Player player, long duration) {
+    public void mute(Player player, long duration, String reason) {
         long expiry = (duration == -1) ? -1 : System.currentTimeMillis() + (duration * 1000);
         mutedPlayers.put(player.getUniqueId(), expiry);
+        if (reason != null && !reason.isEmpty()) {
+            muteReasons.put(player.getUniqueId(), reason);
+        } else {
+            muteReasons.remove(player.getUniqueId());
+        }
         save();
     }
 
@@ -40,7 +48,15 @@ public class MuteManager {
      */
     public void unmute(Player player) {
         mutedPlayers.remove(player.getUniqueId());
+        muteReasons.remove(player.getUniqueId());
         save();
+    }
+
+    /**
+     * 获取禁言原因
+     */
+    public String getReason(Player player) {
+        return muteReasons.get(player.getUniqueId());
     }
 
     /**
@@ -53,6 +69,7 @@ public class MuteManager {
         if (System.currentTimeMillis() > expiry) {
             // 已过期，自动解除
             mutedPlayers.remove(player.getUniqueId());
+            muteReasons.remove(player.getUniqueId());
             save();
             return false;
         }
@@ -70,6 +87,7 @@ public class MuteManager {
         long remaining = expiry - System.currentTimeMillis();
         if (remaining <= 0) {
             mutedPlayers.remove(player.getUniqueId());
+            muteReasons.remove(player.getUniqueId());
             save();
             return null;
         }
@@ -92,11 +110,19 @@ public class MuteManager {
         if (!isMuted(player)) return false;
 
         String remaining = getRemainingTime(player);
-        String msg = plugin.getConfig().getString("mute-message", "&c你已被禁言{reason}&c！")
-                .replace("{reason}", remaining != null ? "，剩余: " + remaining : "");
+        String reason = getReason(player);
 
-        // 使用 & 颜色代码
-        player.sendMessage(plugin.colorize(msg));
+        // 构建提示消息
+        StringBuilder sb = new StringBuilder("&c你已被禁言");
+        if (reason != null && !reason.isEmpty()) {
+            sb.append("，原因: ").append(reason);
+        }
+        if (remaining != null) {
+            sb.append("，剩余: ").append(remaining);
+        }
+        sb.append("！");
+
+        player.sendMessage(plugin.colorize(sb.toString()));
         return true;
     }
 
@@ -118,8 +144,18 @@ public class MuteManager {
         for (String key : data.getKeys(false)) {
             try {
                 UUID uuid = UUID.fromString(key);
-                long expiry = data.getLong(key);
-                mutedPlayers.put(uuid, expiry);
+                if (data.isConfigurationSection(key)) {
+                    long expiry = data.getLong(key + ".expiry");
+                    String reason = data.getString(key + ".reason");
+                    mutedPlayers.put(uuid, expiry);
+                    if (reason != null && !reason.isEmpty()) {
+                        muteReasons.put(uuid, reason);
+                    }
+                } else {
+                    // 兼容旧格式: 直接是数字
+                    long expiry = data.getLong(key);
+                    mutedPlayers.put(uuid, expiry);
+                }
             } catch (IllegalArgumentException e) {
                 plugin.getLogger().warning("无效的UUID: " + key);
             }
@@ -131,8 +167,17 @@ public class MuteManager {
      */
     public void save() {
         if (data == null) return;
+        // 清除旧数据
+        for (String key : data.getKeys(false)) {
+            data.set(key, null);
+        }
         for (Map.Entry<UUID, Long> entry : mutedPlayers.entrySet()) {
-            data.set(entry.getKey().toString(), entry.getValue());
+            String key = entry.getKey().toString();
+            data.set(key + ".expiry", entry.getValue());
+            String reason = muteReasons.get(entry.getKey());
+            if (reason != null && !reason.isEmpty()) {
+                data.set(key + ".reason", reason);
+            }
         }
         try {
             data.save(dataFile);

@@ -30,9 +30,9 @@ public class MuteCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
                              @NotNull String label, @NotNull String[] args) {
         if (args.length < 1) {
-            sender.sendMessage(plugin.colorize("&c用法: /mute <玩家> [时间]"));
+            sender.sendMessage(plugin.colorize("&c用法: /mute <玩家> [时间] [原因]"));
             sender.sendMessage(plugin.colorize("&7时间格式: 数字+单位(s/m/h/d)，例如: 30s, 5m, 2h, 1d"));
-            sender.sendMessage(plugin.colorize("&7不写时间则为永久禁言"));
+            sender.sendMessage(plugin.colorize("&7不写时间则为永久禁言，不写原因则默认"));
             return true;
         }
 
@@ -49,12 +49,16 @@ public class MuteCommand implements CommandExecutor, TabCompleter {
         }
 
         long duration = -1; // 默认永久
+        String reason = null;
+        int nextIndex = 1;
+
+        // 解析时间参数（如果 args[1] 以数字开头则为时间）
         if (args.length >= 2) {
             Matcher matcher = TIME_PATTERN.matcher(args[1]);
             if (matcher.matches()) {
                 long amount = Long.parseLong(matcher.group(1));
                 String unit = matcher.group(2);
-                if (unit == null) unit = "s"; // 默认秒
+                if (unit == null) unit = "s";
 
                 duration = switch (unit.toLowerCase()) {
                     case "s" -> amount;
@@ -63,19 +67,32 @@ public class MuteCommand implements CommandExecutor, TabCompleter {
                     case "d" -> amount * 86400;
                     default -> amount;
                 };
+                nextIndex = 2;
             } else {
-                sender.sendMessage(plugin.colorize("&c时间格式无效！示例: 30s, 5m, 2h, 1d"));
-                return true;
+                // args[1] 不是时间格式 → 作为原因开头
+                nextIndex = 1;
             }
         }
 
-        plugin.getMuteManager().mute(target, duration);
+        // 解析原因（剩余所有参数）
+        if (args.length > nextIndex) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = nextIndex; i < args.length; i++) {
+                if (sb.length() > 0) sb.append(" ");
+                sb.append(args[i]);
+            }
+            reason = sb.toString();
+        }
 
+        plugin.getMuteManager().mute(target, duration, reason);
+
+        // 广播禁言公告
+        String reasonText = (reason != null && !reason.isEmpty()) ? "，原因: " + reason : "";
         if (duration == -1) {
-            Bukkit.broadcast(plugin.colorize("&c" + target.getName() + " &e已被永久禁言！"));
+            Bukkit.broadcast(plugin.colorize("&c" + target.getName() + " &e已被永久禁言" + reasonText + "！"));
         } else {
             String timeStr = formatDuration(duration);
-            Bukkit.broadcast(plugin.colorize("&c" + target.getName() + " &e已被禁言 " + timeStr + "！"));
+            Bukkit.broadcast(plugin.colorize("&c" + target.getName() + " &e已被禁言 " + timeStr + reasonText + "！"));
         }
 
         return true;
