@@ -64,9 +64,11 @@ public class ChatListener implements Listener {
         DatabaseManager db = plugin.getDatabaseManager();
         if (db.isEnabled()) {
             db.logPlayerChat(player.getName(), player.getUniqueId().toString(), plainText);
-            plugin.getLogger().fine("已写入聊天记录: " + player.getName() + " -> " + plainText);
-        } else {
-            plugin.getLogger().warning("数据库未启用，跳过写入: " + player.getName() + " -> " + plainText);
+            if (plugin.isDebug()) {
+                plugin.getLogger().info("[DEBUG] 已写入聊天记录: " + player.getName() + " -> " + plainText);
+            }
+        } else if (plugin.isDebug()) {
+            plugin.getLogger().info("[DEBUG] 数据库未启用，跳过写入: " + player.getName() + " -> " + plainText);
         }
 
         // 5. 构建带颜色代码 + 可点击 URL 的消息组件

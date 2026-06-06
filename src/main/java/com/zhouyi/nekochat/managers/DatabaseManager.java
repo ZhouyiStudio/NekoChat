@@ -110,7 +110,9 @@ public class DatabaseManager {
                 stmt.setString(4, type);
                 stmt.setLong(5, now);
                 stmt.executeUpdate();
-                plugin.getLogger().fine("DB写入成功: " + playerName + " [" + type + "]");
+                if (plugin.isDebug()) {
+                    plugin.getLogger().info("[DEBUG] DB写入成功: " + playerName + " [" + type + "]");
+                }
 
             } catch (SQLException e) {
                 plugin.getLogger().warning("写入聊天记录失败: " + e.getMessage());

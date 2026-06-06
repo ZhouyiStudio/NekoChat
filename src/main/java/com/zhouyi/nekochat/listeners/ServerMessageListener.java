@@ -34,6 +34,9 @@ public class ServerMessageListener implements Listener {
         DatabaseManager db = plugin.getDatabaseManager();
         if (db.isEnabled()) {
             db.logServerMessage(message);
+            if (plugin.isDebug()) {
+                plugin.getLogger().info("[DEBUG] 已写入服务器消息: " + message);
+            }
         }
 
         // 处理消息：解析 & 颜色代码 + URL 转可点击
@@ -57,6 +60,9 @@ public class ServerMessageListener implements Listener {
         DatabaseManager db = plugin.getDatabaseManager();
         if (db.isEnabled()) {
             db.logPlayerChat(player.getName(), player.getUniqueId().toString(), "/say " + message);
+            if (plugin.isDebug()) {
+                plugin.getLogger().info("[DEBUG] 已写入玩家 /say: " + player.getName() + " -> " + message);
+            }
         }
 
         // 处理消息：解析 & 颜色代码 + URL 转可点击

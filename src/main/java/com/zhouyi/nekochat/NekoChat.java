@@ -150,6 +150,13 @@ public class NekoChat extends JavaPlugin {
     }
 
     /**
+     * 是否启用调试日志
+     */
+    public boolean isDebug() {
+        return getConfig().getBoolean("debug", false);
+    }
+
+    /**
      * 将带 & 的颜色代码转换为 Adventure Component
      */
     public Component colorize(String text) {
