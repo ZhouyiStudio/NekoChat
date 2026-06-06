@@ -1,6 +1,7 @@
 package com.zhouyi.nekochat.commands;
 
 import com.zhouyi.nekochat.NekoChat;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -11,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PTitleCommand implements CommandExecutor, TabCompleter {
 
@@ -23,52 +25,65 @@ public class PTitleCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
                              @NotNull String label, @NotNull String[] args) {
-        if (!(sender instanceof Player player)) {
-            sender.sendMessage(plugin.colorize("&c只有玩家才能使用此命令！"));
-            return true;
-        }
 
         if (args.length < 1) {
-            player.sendMessage(plugin.colorize("&6/ptitle add <头衔> &e- 设置头衔（支持 & 颜色代码）"));
-            player.sendMessage(plugin.colorize("&6/ptitle remove &e- 移除头衔"));
-            player.sendMessage(plugin.colorize("&7示例: /ptitle add &b&l大神"));
+            sender.sendMessage(plugin.colorize("&6/ptitle add <玩家> <头衔> &e- 给玩家设置头衔（支持 & 颜色代码）"));
+            sender.sendMessage(plugin.colorize("&6/ptitle remove <玩家> &e- 移除玩家头衔"));
+            sender.sendMessage(plugin.colorize("&7示例: /ptitle add Steve &b&l大神"));
             return true;
         }
 
         switch (args[0].toLowerCase()) {
             case "add" -> {
-                if (args.length < 2) {
-                    player.sendMessage(plugin.colorize("&c请指定头衔！用法: /ptitle add <头衔>"));
+                if (args.length < 3) {
+                    sender.sendMessage(plugin.colorize("&c用法: /ptitle add <玩家> <头衔>"));
                     return true;
                 }
 
-                // 拼接头衔（支持空格和颜色代码）
+                Player target = Bukkit.getPlayerExact(args[1]);
+                if (target == null) {
+                    sender.sendMessage(plugin.colorize("&c玩家 " + args[1] + " 不在线！"));
+                    return true;
+                }
+
+                // 拼接头衔
                 StringBuilder sb = new StringBuilder();
-                for (int i = 1; i < args.length; i++) {
+                for (int i = 2; i < args.length; i++) {
                     if (sb.length() > 0) sb.append(" ");
                     sb.append(args[i]);
                 }
                 String title = sb.toString();
 
-                // 限制头衔长度（防止过长）
+                // 限制头衔长度
                 if (title.replace("&", "").replaceAll("[0-9a-fklmnor]", "").length() > 32) {
-                    player.sendMessage(plugin.colorize("&c头衔过长！最大支持32个字符（不含颜色代码）。"));
+                    sender.sendMessage(plugin.colorize("&c头衔过长！最大支持32个字符（不含颜色代码）。"));
                     return true;
                 }
 
-                plugin.getTitleManager().setTitle(player, title);
-                // 更新 Tab 列表显示
-                player.playerListName(plugin.getTitleManager().getTabName(player));
-                player.sendMessage(plugin.colorize("&a头衔已设置为: " + title));
+                plugin.getTitleManager().setTitle(target, title);
+                target.playerListName(plugin.getTitleManager().getTabName(target));
+                sender.sendMessage(plugin.colorize("&a已设置 " + target.getName() + " 的头衔为: " + title));
+                target.sendMessage(plugin.colorize("&a你的头衔已被设置为: " + title));
             }
             case "remove", "del", "delete", "clear" -> {
-                plugin.getTitleManager().removeTitle(player);
-                // 恢复 Tab 列表默认显示
-                player.playerListName(player.name());
-                player.sendMessage(plugin.colorize("&a头衔已移除！"));
+                if (args.length < 2) {
+                    sender.sendMessage(plugin.colorize("&c用法: /ptitle remove <玩家>"));
+                    return true;
+                }
+
+                Player target = Bukkit.getPlayerExact(args[1]);
+                if (target == null) {
+                    sender.sendMessage(plugin.colorize("&c玩家 " + args[1] + " 不在线！"));
+                    return true;
+                }
+
+                plugin.getTitleManager().removeTitle(target);
+                target.playerListName(target.name());
+                sender.sendMessage(plugin.colorize("&a已移除 " + target.getName() + " 的头衔！"));
+                target.sendMessage(plugin.colorize("&a你的头衔已被移除！"));
             }
             default -> {
-                player.sendMessage(plugin.colorize("&c未知子命令！可用: add, remove"));
+                sender.sendMessage(plugin.colorize("&c未知子命令！可用: add, remove"));
             }
         }
 
@@ -78,13 +93,15 @@ public class PTitleCommand implements CommandExecutor, TabCompleter {
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                                                 @NotNull String alias, @NotNull String[] args) {
-        List<String> completions = new ArrayList<>();
         if (args.length == 1) {
-            completions.add("add");
-            completions.add("remove");
-            return completions;
+            return List.of("add", "remove");
         }
-        // add 后面不补全
+        if (args.length == 2) {
+            return Bukkit.getOnlinePlayers().stream()
+                    .map(Player::getName)
+                    .filter(n -> n.toLowerCase().startsWith(args[1].toLowerCase()))
+                    .collect(Collectors.toList());
+        }
         return List.of();
     }
 }

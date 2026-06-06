@@ -3,6 +3,7 @@ package com.zhouyi.nekochat;
 import com.zhouyi.nekochat.commands.CBanCommand;
 import com.zhouyi.nekochat.commands.CWhitelistCommand;
 import com.zhouyi.nekochat.commands.MuteCommand;
+import com.zhouyi.nekochat.commands.NChatCommand;
 import com.zhouyi.nekochat.commands.PTitleCommand;
 import com.zhouyi.nekochat.commands.UnmuteCommand;
 import com.zhouyi.nekochat.listeners.ChatListener;
@@ -69,10 +70,16 @@ public class NekoChat extends JavaPlugin {
             cwhitelistCmd.setTabCompleter(new CWhitelistCommand(this));
         }
 
+        var nchatCmd = getCommand("nchat");
+        if (nchatCmd != null) {
+            nchatCmd.setExecutor(new NChatCommand(this));
+        }
+
         // 注册事件监听
         getServer().getPluginManager().registerEvents(new ChatListener(this), this);
 
-        getLogger().info("NekoChat 已启用！");
+        getLogger().info("NekoChat 聊天管理系统 已启用!");
+        getLogger().info("作者: Zhouyi | GitHub: https://github.com/ZhouyiStudio/NekoChat");
     }
 
     @Override

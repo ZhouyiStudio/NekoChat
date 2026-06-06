@@ -26,11 +26,14 @@ commands:
     description: 管理宣传检测白名单
     usage: /cwhitelist add <词汇> | /cwhitelist remove <词汇> | /cwhitelist list
     permission: nekochat.cban
+  nchat:
+    description: 显示插件帮助
+    usage: /nchat
 
 permissions:
   nekochat.ptitle:
     description: 允许使用头衔功能
-    default: true
+    default: op
   nekochat.cban:
     description: 允许管理屏蔽词
     default: op
