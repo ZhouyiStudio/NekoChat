@@ -136,6 +136,17 @@ public class DatabaseManager {
     }
 
     /**
+     * 重新加载数据库配置（/nchat reload 时调用）
+     * 关闭旧连接池，重新读取 config.yml 并初始化新连接。
+     */
+    public void reload() {
+        shutdown();
+        enabled = false;
+        dataSource = null;
+        init();
+    }
+
+    /**
      * 关闭连接池
      */
     public void shutdown() {

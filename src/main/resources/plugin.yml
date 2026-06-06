@@ -27,10 +27,15 @@ commands:
     usage: /cwhitelist add <词汇> | /cwhitelist remove <词汇> | /cwhitelist list
     permission: nekochat.cban
   nchat:
-    description: 显示插件帮助
-    usage: /nchat
+    description: 显示插件帮助或重载配置
+    usage: |
+      /nchat          - 显示帮助
+      /nchat reload   - 重新加载配置文件 (OP)
 
 permissions:
+  nekochat.nchat:
+    description: 允许使用 /nchat reload 重载配置
+    default: op
   nekochat.ptitle:
     description: 允许使用头衔功能
     default: op

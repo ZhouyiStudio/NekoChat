@@ -194,4 +194,15 @@ public class CBanManager {
             plugin.getLogger().severe("无法保存 cban.yml: " + e.getMessage());
         }
     }
+
+    /**
+     * 重新加载配置（/nchat reload 时调用）
+     * 重新读取 config.yml 中的默认屏蔽词和默认白名单，
+     * 同时保留数据文件中的自定义内容。
+     */
+    public void reload() {
+        bannedWords.clear();
+        whitelistWords.clear();
+        load();
+    }
 }
