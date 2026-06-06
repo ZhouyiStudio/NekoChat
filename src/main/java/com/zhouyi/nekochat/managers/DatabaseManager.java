@@ -49,7 +49,7 @@ public class DatabaseManager {
         try {
             HikariConfig hikari = new HikariConfig();
             hikari.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + database
-                    + "?useSSL=false&characterEncoding=utf8mb4&rewriteBatchedStatements=true");
+                    + "?useSSL=false&characterEncoding=UTF-8&rewriteBatchedStatements=true");
             hikari.setUsername(user);
             hikari.setPassword(password);
             hikari.setMaximumPoolSize(poolSize);
