@@ -66,3 +66,4 @@ public class ServerMessageListener implements Listener {
         event.setCancelled(true);
         Bukkit.broadcast(processed);
     }
+}

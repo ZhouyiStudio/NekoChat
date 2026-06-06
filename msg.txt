@@ -1,7 +1,0 @@
-feat: 添加 /nchat op add/remove/list 自定义管理员系统
-
-新增 OpManager 管理自定义 OP 名单，持久化到 ops.yml
-只有通过 /nchat op add 添加的玩家才能使用 /ptitle /mute 等管理命令
-控制台始终有权限，用于添加第一个管理员
-
-Co-Authored-By: AtomCode (deepseek-v4-flash) <noreply@atomgit.com>
