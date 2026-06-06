@@ -1,10 +1,10 @@
 # NekoChat
 
-一个适用于 Purpur 1.21.1 (Paper API) 的聊天管理插件，支持头衔、屏蔽词、禁言和服务器宣传检测。
+一个适用于 Purpur 1.21.1 (Paper API) 的聊天管理插件，支持头衔、屏蔽词、禁言、服务器宣传检测和自定义管理员系统。
 
 ## 功能
 
-### 🏷️ 头衔系统 (OP/控制台)
+### 🏷️ 头衔系统
 ```
 /ptitle add <玩家> <头衔>    给指定玩家设置头衔（支持 & 颜色代码）
 /ptitle remove <玩家>      移除指定玩家头衔
@@ -14,8 +14,20 @@
 
 ### 📖 帮助
 ```
-/nchat    显示插件帮助信息
+/nchat                      显示插件帮助信息
+/nchat reload               重新加载配置文件
 ```
+
+### 👑 自定义管理员系统
+```
+/nchat op add <玩家>        添加管理员
+/nchat op remove <玩家>     移除管理员
+/nchat op list              查看管理员列表
+```
+- 只有通过 `/nchat op add` 添加的玩家才能使用管理命令
+- 控制台（服务器后台）始终有管理权限
+- 首次使用在后台执行: `nchat op add <你的游戏名>`
+- Bukkit OP 玩家也需要添加才能使用
 
 ### 🚫 屏蔽词系统
 ```
@@ -52,16 +64,6 @@
 - 自动拦截聊天中的 IP 地址和外站域名
 - 仅允许白名单内的服务器（默认 `3d3k.org`、`3d3k.discourse.group`）
 - 可在 `config.yml` 中关闭
-
-## 权限
-
-| 权限 | 默认 | 说明 |
-|------|------|------|
-| `nekochat.ptitle` | OP (控制台) | 使用头衔功能 |
-| `nekochat.cban` | OP | 管理屏蔽词和白名单 |
-| `nekochat.mute` | OP | 禁言/解禁玩家 |
-| `nekochat.bypass.cban` | OP | 绕过屏蔽词检测和宣传检测 |
-| `nekochat.bypass.mute` | OP | 绕过禁言 |
 
 ## 构建
 
