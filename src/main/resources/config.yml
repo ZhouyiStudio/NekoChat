@@ -1,5 +1,14 @@
 # NekoChat 配置文件
 
+# 头衔格式
+title-format: "&7[&r{title}&7]"
+
+# === 禁言 ===
+mute-message: "&c你已被禁言{reason}&c！"
+
+# === 屏蔽词 ===
+cban-message: "&c消息包含违规词汇，已拦截！"
+
 # 默认屏蔽词列表（自动添加）
 banned-words:
   # 中文
@@ -33,11 +42,7 @@ banned-words:
   - "cunt"
   - "motherfucker"
 
-# 禁言提示
-mute-message: "&c你已被禁言{reason}&c！"
-
-# 屏蔽词提示
-cban-message: "&c消息包含违规词汇，已拦截！"
-
-# 头衔格式
-title-format: "&7[&r{title}&7]&r"
+# === 服务器宣传检测 ===
+# 开启后，聊天消息中出现 IP 地址或外站域名（非 *.3d3k.org）将被拦截
+server-ad-check: true
+server-ad-message: "&c请勿宣传其他服务器！"

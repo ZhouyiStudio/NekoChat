@@ -45,7 +45,7 @@ jobs:
         id: version
         shell: bash
         run: |
-          VERSION=$(grep 'version =' build.gradle.kts | sed 's/.*"\(.*\)".*/\1/')
+          VERSION=$(./gradlew -q properties 2>/dev/null | grep "^version:" | awk '{print $2}')
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Upload artifact

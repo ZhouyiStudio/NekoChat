@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class CBanManager {
 
@@ -15,6 +16,17 @@ public class CBanManager {
     private final List<String> bannedWords = new ArrayList<>();
     private File dataFile;
     private FileConfiguration data;
+
+    // IP 地址正则
+    private static final Pattern IP_PATTERN = Pattern.compile(
+            "\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b"
+    );
+    // 域名正则 (匹配常见顶级域名)
+    private static final Pattern DOMAIN_PATTERN = Pattern.compile(
+            "\\b[a-zA-Z0-9.-]+\\.(?:com|net|org|me|io|xyz|top|cc|gg|fun|club|live|site|host|pro|info|online|world|vip|win|bid|cn|tk|ml|ga)\\b"
+    );
+    // 允许的服务器
+    private static final String ALLOWED_SERVER = "3d3k.org";
 
     public CBanManager(NekoChat plugin) {
         this.plugin = plugin;
@@ -51,6 +63,38 @@ public class CBanManager {
             }
         }
         return false;
+    }
+
+    /**
+     * 检查消息是否包含服务器宣传 (只允许 *.3d3k.org)
+     * @return 匹配到的非法服务器地址，null 表示通过
+     */
+    public String containsServerAd(String message) {
+        // 配置中关闭了检测
+        if (!plugin.getConfig().getBoolean("server-ad-check", true)) {
+            return null;
+        }
+
+        String lower = message.toLowerCase();
+
+        // 如果包含允许的服务器，跳过检测
+        if (lower.contains(ALLOWED_SERVER)) {
+            return null;
+        }
+
+        // 检测 IP 地址
+        var ipMatcher = IP_PATTERN.matcher(lower);
+        if (ipMatcher.find()) {
+            return ipMatcher.group();
+        }
+
+        // 检测域名
+        var domainMatcher = DOMAIN_PATTERN.matcher(lower);
+        if (domainMatcher.find()) {
+            return domainMatcher.group();
+        }
+
+        return null;
     }
 
     /**

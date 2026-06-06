@@ -4,7 +4,23 @@ plugins {
 }
 
 group = "com.zhouyi.nekochat"
-version = "1.0.0"
+
+// 版本自动迭代: 基于 Git 提交数
+fun getGitCommitCount(): String {
+    try {
+        val process = ProcessBuilder("git", "rev-list", "--count", "HEAD")
+            .directory(projectDir)
+            .redirectErrorStream(true)
+            .start()
+        val output = process.inputStream.bufferedReader().readText().trim()
+        process.waitFor()
+        return output.ifEmpty { "0" }
+    } catch (e: Exception) {
+        return "0"
+    }
+}
+
+version = "1.0.${getGitCommitCount()}"
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(21))
