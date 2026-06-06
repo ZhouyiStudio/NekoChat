@@ -1,6 +1,7 @@
 package com.zhouyi.nekochat.listeners;
 
 import com.zhouyi.nekochat.NekoChat;
+import com.zhouyi.nekochat.managers.DatabaseManager;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -59,7 +60,13 @@ public class ChatListener implements Listener {
             }
         }
 
-        // 4. 构建带颜色代码 + 可点击 URL 的消息组件
+        // 4. 异步记录聊天到数据库
+        DatabaseManager db = plugin.getDatabaseManager();
+        if (db.isEnabled()) {
+            db.logPlayerChat(player.getName(), player.getUniqueId().toString(), plainText);
+        }
+
+        // 5. 构建带颜色代码 + 可点击 URL 的消息组件
         Component clickableMessage = plugin.processMessage(plainText);
 
         // 5. 使用自定义渲染器：头衔 + 玩家名 + 可点击消息

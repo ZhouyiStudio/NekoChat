@@ -33,6 +33,8 @@ repositories {
 
 dependencies {
     paperweight.paperDevBundle("1.21.1-R0.1-SNAPSHOT")
+    // MySQL 连接驱动
+    implementation("com.mysql:mysql-connector-j:8.4.0")
 }
 
 tasks {

@@ -9,6 +9,7 @@ import com.zhouyi.nekochat.commands.UnmuteCommand;
 import com.zhouyi.nekochat.listeners.ChatListener;
 import com.zhouyi.nekochat.listeners.ServerMessageListener;
 import com.zhouyi.nekochat.managers.CBanManager;
+import com.zhouyi.nekochat.managers.DatabaseManager;
 import com.zhouyi.nekochat.managers.MuteManager;
 import com.zhouyi.nekochat.managers.TitleManager;
 import net.kyori.adventure.text.Component;
@@ -29,6 +30,7 @@ public class NekoChat extends JavaPlugin {
     private TitleManager titleManager;
     private CBanManager cbanManager;
     private MuteManager muteManager;
+    private DatabaseManager databaseManager;
     private MiniMessage miniMessage;
 
     // URL 正则（公开给其他类使用）
@@ -49,6 +51,7 @@ public class NekoChat extends JavaPlugin {
         this.titleManager = new TitleManager(this);
         this.cbanManager = new CBanManager(this);
         this.muteManager = new MuteManager(this);
+        this.databaseManager = new DatabaseManager(this);
 
         // 注册命令
         var ptitleCmd = getCommand("ptitle");
@@ -100,6 +103,7 @@ public class NekoChat extends JavaPlugin {
         if (titleManager != null) titleManager.save();
         if (cbanManager != null) cbanManager.save();
         if (muteManager != null) muteManager.save();
+        if (databaseManager != null) databaseManager.shutdown();
         getLogger().info("NekoChat 已禁用！");
     }
 
@@ -117,6 +121,10 @@ public class NekoChat extends JavaPlugin {
 
     public MuteManager getMuteManager() {
         return muteManager;
+    }
+
+    public DatabaseManager getDatabaseManager() {
+        return databaseManager;
     }
 
     /**

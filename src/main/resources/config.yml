@@ -3,6 +3,19 @@
 # 头衔格式
 title-format: "&7[&r{title}&7]"
 
+# === 数据库 ===
+database:
+  # MySQL 数据库配置（不配置或留空则不启用聊天记录）
+  host: localhost
+  port: 3306
+  database: nekochat
+  user: root
+  password: ""
+  table-prefix: nc_
+  # 连接池设置
+  pool-size: 10
+  connection-timeout: 5000
+
 # === 禁言 ===
 mute-message: "&c你已被禁言{reason}&c！"
 
