@@ -69,15 +69,26 @@ jobs:
           name: NekoChat
           path: .
 
-      - name: Get version
+      - name: Determine tag and version
         id: ver
         shell: bash
-        run: echo "version=${{ needs.build.outputs.version }}" >> "$GITHUB_OUTPUT"
+        run: |
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == refs/tags/v* ]]; then
+            # 标签推送: 使用标签名
+            TAG_NAME="${GITHUB_REF#refs/tags/}"
+            VERSION="${TAG_NAME#v}"
+          else
+            # 手动触发: 使用构建版本号
+            VERSION="${{ needs.build.outputs.version }}"
+            TAG_NAME="v${VERSION}"
+          fi
+          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.ver.outputs.version }}
+          tag_name: ${{ steps.ver.outputs.tag_name }}
           name: NekoChat v${{ steps.ver.outputs.version }}
           files: NekoChat-*.jar
           generate_release_notes: true
