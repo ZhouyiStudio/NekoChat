@@ -11,16 +11,18 @@ import com.zhouyi.nekochat.listeners.ServerMessageListener;
 import com.zhouyi.nekochat.managers.CBanManager;
 import com.zhouyi.nekochat.managers.DatabaseManager;
 import com.zhouyi.nekochat.managers.MuteManager;
+import com.zhouyi.nekochat.managers.OpManager;
 import com.zhouyi.nekochat.managers.TitleManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,6 +33,7 @@ public class NekoChat extends JavaPlugin {
     private CBanManager cbanManager;
     private MuteManager muteManager;
     private DatabaseManager databaseManager;
+    private OpManager opManager;
     private MiniMessage miniMessage;
 
     // URL 正则（公开给其他类使用）
@@ -52,6 +55,7 @@ public class NekoChat extends JavaPlugin {
         this.cbanManager = new CBanManager(this);
         this.muteManager = new MuteManager(this);
         this.databaseManager = new DatabaseManager(this);
+        this.opManager = new OpManager(this);
 
         // 注册命令
         var ptitleCmd = getCommand("ptitle");
@@ -87,6 +91,7 @@ public class NekoChat extends JavaPlugin {
         var nchatCmd = getCommand("nchat");
         if (nchatCmd != null) {
             nchatCmd.setExecutor(new NChatCommand(this));
+            nchatCmd.setTabCompleter(new NChatCommand(this));
         }
 
         // 注册事件监听
@@ -125,6 +130,23 @@ public class NekoChat extends JavaPlugin {
 
     public DatabaseManager getDatabaseManager() {
         return databaseManager;
+    }
+
+    public OpManager getOpManager() {
+        return opManager;
+    }
+
+    /**
+     * 检查 CommandSender 是否有管理员权限
+     * 只有控制台和通过 /nchat op add 添加的玩家有权限
+     * Bukkit OP 玩家默认没有权限，需要单独添加
+     */
+    public boolean isAdmin(CommandSender sender) {
+        if (sender instanceof ConsoleCommandSender) return true;
+        if (sender instanceof Player) {
+            return opManager.isOp(sender.getName());
+        }
+        return false;
     }
 
     /**

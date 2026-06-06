@@ -22,6 +22,11 @@ public class CWhitelistCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
                              @NotNull String label, @NotNull String[] args) {
+        if (!plugin.isAdmin(sender)) {
+            sender.sendMessage(plugin.colorize("&c你没有权限执行此命令！"));
+            return true;
+        }
+
         if (args.length < 1) {
             sender.sendMessage(plugin.colorize("&6/cwhitelist add <词汇> &e- 添加宣传检测白名单"));
             sender.sendMessage(plugin.colorize("&6/cwhitelist remove <词汇> &e- 移除宣传检测白名单"));

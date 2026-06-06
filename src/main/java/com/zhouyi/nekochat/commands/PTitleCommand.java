@@ -26,6 +26,11 @@ public class PTitleCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
                              @NotNull String label, @NotNull String[] args) {
 
+        if (!plugin.isAdmin(sender)) {
+            sender.sendMessage(plugin.colorize("&c你没有权限执行此命令！"));
+            return true;
+        }
+
         if (args.length < 1) {
             sender.sendMessage(plugin.colorize("&6/ptitle add <玩家> <头衔> &e- 给玩家设置头衔（支持 & 颜色代码）"));
             sender.sendMessage(plugin.colorize("&6/ptitle remove <玩家> &e- 移除玩家头衔"));

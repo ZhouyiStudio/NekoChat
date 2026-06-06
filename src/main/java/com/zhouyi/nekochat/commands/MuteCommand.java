@@ -29,6 +29,11 @@ public class MuteCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
                              @NotNull String label, @NotNull String[] args) {
+        if (!plugin.isAdmin(sender)) {
+            sender.sendMessage(plugin.colorize("&c你没有权限执行此命令！"));
+            return true;
+        }
+
         if (args.length < 1) {
             sender.sendMessage(plugin.colorize("&c用法: /mute <玩家> [时间] [原因]"));
             sender.sendMessage(plugin.colorize("&7时间格式: 数字+单位(s/m/h/d)，例如: 30s, 5m, 2h, 1d"));

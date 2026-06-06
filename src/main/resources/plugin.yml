@@ -3,47 +3,39 @@ version: '${version}'
 main: com.zhouyi.nekochat.NekoChat
 api-version: '1.21'
 author: NekoChat
-description: 聊天管理插件 - 头衔/屏蔽词/禁言 (by Zhouyi)
+description: 聊天管理插件 - 头衔/屏蔽词/禁言/自定义管理员 (by Zhouyi)
 
 commands:
   ptitle:
     description: 设置或移除头衔
-    usage: /ptitle add <头衔> | /ptitle remove
+    usage: |
+      /ptitle add <玩家> <头衔>   - 给玩家设置头衔
+      /ptitle remove <玩家>      - 移除玩家头衔
     aliases: [title, prefix]
   cban:
     description: 管理屏蔽词
     usage: /cban add <词汇> | /cban remove <词汇> | /cban list
-    permission: nekochat.cban
   mute:
     description: 禁言玩家
     usage: /mute <玩家> [时间(数字+s/m/h/d)]
-    permission: nekochat.mute
   unmute:
     description: 解除禁言
     usage: /unmute <玩家>
-    permission: nekochat.mute
   cwhitelist:
     description: 管理宣传检测白名单
     usage: /cwhitelist add <词汇> | /cwhitelist remove <词汇> | /cwhitelist list
-    permission: nekochat.cban
   nchat:
-    description: 显示插件帮助或重载配置
+    description: 显示插件帮助、重载配置或管理管理员
     usage: |
       /nchat          - 显示帮助
-      /nchat reload   - 重新加载配置文件 (OP)
+      /nchat reload   - 重新加载配置文件
+      /nchat op add <玩家>    - 添加管理员
+      /nchat op remove <玩家> - 移除管理员
+      /nchat op list          - 查看管理员列表
 
 permissions:
   nekochat.nchat:
-    description: 允许使用 /nchat reload 重载配置
-    default: op
-  nekochat.ptitle:
-    description: 允许使用头衔功能
-    default: op
-  nekochat.cban:
-    description: 允许管理屏蔽词
-    default: op
-  nekochat.mute:
-    description: 允许禁言/解禁玩家
+    description: 允许使用 /nchat 管理命令
     default: op
   nekochat.bypass.cban:
     description: 绕过屏蔽词检测
