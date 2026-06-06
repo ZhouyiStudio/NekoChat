@@ -11,12 +11,16 @@ import com.zhouyi.nekochat.managers.CBanManager;
 import com.zhouyi.nekochat.managers.MuteManager;
 import com.zhouyi.nekochat.managers.TitleManager;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class NekoChat extends JavaPlugin {
 
@@ -25,6 +29,12 @@ public class NekoChat extends JavaPlugin {
     private CBanManager cbanManager;
     private MuteManager muteManager;
     private MiniMessage miniMessage;
+
+    // URL 正则（公开给其他类使用）
+    static final Pattern URL_PATTERN = Pattern.compile(
+            "https?://[\\w./?=&#%+~@,:;!-]+|www\\.[\\w./?=&#%+~@,:;!-]+",
+            Pattern.CASE_INSENSITIVE
+    );
 
     @Override
     public void onEnable() {
@@ -77,6 +87,7 @@ public class NekoChat extends JavaPlugin {
 
         // 注册事件监听
         getServer().getPluginManager().registerEvents(new ChatListener(this), this);
+        getServer().getPluginManager().registerEvents(new ServerMessageListener(this), this);
 
         getLogger().info("NekoChat 聊天管理系统 已启用!");
         getLogger().info("作者: Zhouyi | GitHub: https://github.com/ZhouyiStudio/NekoChat");
@@ -112,6 +123,47 @@ public class NekoChat extends JavaPlugin {
      */
     public Component colorize(String text) {
         return LegacyComponentSerializer.legacyAmpersand().deserialize(text);
+    }
+
+    /**
+     * 处理消息: 解析 & 颜色代码 + URL 转可点击链接
+     * 非 URL 部分保留颜色代码，URL 部分显示为天蓝色可点击
+     */
+    public Component processMessage(String text) {
+        Matcher matcher = URL_PATTERN.matcher(text);
+        if (!matcher.find()) {
+            // 没有 URL，直接解析颜色代码
+            return colorize(text);
+        }
+
+        Component result = Component.empty();
+        int lastEnd = 0;
+        matcher.reset();
+
+        while (matcher.find()) {
+            // URL 前面的文本（含颜色代码）
+            if (matcher.start() > lastEnd) {
+                result = result.append(colorize(text.substring(lastEnd, matcher.start())));
+            }
+
+            String url = matcher.group();
+            String clickUrl = url.startsWith("http") ? url : "https://" + url;
+
+            Component urlComponent = Component.text(url)
+                    .color(NamedTextColor.AQUA)
+                    .clickEvent(ClickEvent.openUrl(clickUrl))
+                    .hoverEvent(colorize("&b点击打开: " + url));
+
+            result = result.append(urlComponent);
+            lastEnd = matcher.end();
+        }
+
+        // 剩余文本
+        if (lastEnd < text.length()) {
+            result = result.append(colorize(text.substring(lastEnd)));
+        }
+
+        return result;
     }
 
     /**

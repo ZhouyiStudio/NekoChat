@@ -3,17 +3,12 @@ package com.zhouyi.nekochat.listeners;
 import com.zhouyi.nekochat.NekoChat;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class ChatListener implements Listener {
 
@@ -22,12 +17,6 @@ public class ChatListener implements Listener {
     private static final Component ANGLE_BRACKET_LEFT = Component.text("<");
     private static final Component ANGLE_BRACKET_RIGHT = Component.text("> ");
     private static final Component SPACE = Component.space();
-
-    // URL 正则
-    private static final Pattern URL_PATTERN = Pattern.compile(
-            "https?://[\\w./?=&#%+~@,:;!-]+|www\\.[\\w./?=&#%+~@,:;!-]+",
-            Pattern.CASE_INSENSITIVE
-    );
 
     public ChatListener(NekoChat plugin) {
         this.plugin = plugin;
@@ -70,8 +59,8 @@ public class ChatListener implements Listener {
             }
         }
 
-        // 4. 构建带可点击 URL 的消息组件
-        Component clickableMessage = makeClickableMessage(plainText);
+        // 4. 构建带颜色代码 + 可点击 URL 的消息组件
+        Component clickableMessage = plugin.processMessage(plainText);
 
         // 5. 使用自定义渲染器：头衔 + 玩家名 + 可点击消息
         boolean hasTitle = plugin.getTitleManager().hasTitle(player);
@@ -97,47 +86,6 @@ public class ChatListener implements Listener {
 
             return base.append(clickableMessage);
         });
-    }
-
-    /**
-     * 将纯文本中的 URL 替换为可点击的组件
-     */
-    private Component makeClickableMessage(String text) {
-        Matcher matcher = URL_PATTERN.matcher(text);
-        if (!matcher.find()) {
-            // 没有 URL，直接返回纯文本
-            return Component.text(text);
-        }
-
-        Component result = Component.empty();
-        int lastEnd = 0;
-
-        do {
-            // URL 前面的普通文本
-            if (matcher.start() > lastEnd) {
-                result = result.append(Component.text(text.substring(lastEnd, matcher.start())));
-            }
-
-            String url = matcher.group();
-            // 确保 URL 有协议前缀
-            String clickUrl = url.startsWith("http") ? url : "https://" + url;
-
-            Component urlComponent = Component.text(url)
-                    .color(net.kyori.adventure.text.format.NamedTextColor.AQUA)
-                    .clickEvent(ClickEvent.openUrl(clickUrl))
-                    .hoverEvent(plugin.colorize("&b点击打开: " + url));
-
-            result = result.append(urlComponent);
-            lastEnd = matcher.end();
-
-        } while (matcher.find());
-
-        // 剩余文本
-        if (lastEnd < text.length()) {
-            result = result.append(Component.text(text.substring(lastEnd)));
-        }
-
-        return result;
     }
 
     @EventHandler
