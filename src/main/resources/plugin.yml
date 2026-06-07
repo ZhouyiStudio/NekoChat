@@ -38,6 +38,12 @@ commands:
     usage: |
       /ai <消息>      - 向 AI 提问
       /ai <提示词> <消息> - 使用指定提示词提问
+  aiban:
+    description: 管理 AI 封禁
+    usage: |
+      /aiban <玩家>   - 禁止玩家使用 AI
+      /aiban remove <玩家> - 解除封禁
+      /aiban list     - 查看封禁列表
 
 permissions:
   nekochat.nchat:

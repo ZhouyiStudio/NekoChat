@@ -48,6 +48,19 @@ public class AICommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        // 检查 AI 封禁
+        if (plugin.getAIManager().isAiBanned(player.getName())) {
+            player.sendMessage(plugin.colorize("&c你已被禁止使用 AI 助手！"));
+            return true;
+        }
+
+        // 检查每日使用限制
+        if (plugin.getAIManager().isDailyLimitReached(player.getUniqueId())) {
+            int limit = plugin.getAIManager().getDailyLimit();
+            player.sendMessage(plugin.colorize("&c你今天使用 AI 已达上限（" + limit + "次），明天再试吧！"));
+            return true;
+        }
+
         // 检查冷却
         if (plugin.getAIManager().isOnCooldown(player.getUniqueId())) {
             int remaining = plugin.getAIManager().getCooldownRemaining(player.getUniqueId());
@@ -87,8 +100,9 @@ public class AICommand implements CommandExecutor, TabCompleter {
      * 发送 AI 消息并处理回复
      */
     private void sendAIMessage(Player player, String message, String customPrompt, String promptHint) {
-        // 记录冷却
+        // 记录冷却和每日使用
         plugin.getAIManager().recordUsage(player.getUniqueId());
+        plugin.getAIManager().incrementDailyUsage(player.getUniqueId());
 
         // 通知玩家请求已发送
         player.sendMessage(plugin.colorize("&7AI 思考中，请稍候..."));

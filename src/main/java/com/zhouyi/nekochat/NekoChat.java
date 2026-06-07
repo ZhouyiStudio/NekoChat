@@ -1,6 +1,7 @@
 package com.zhouyi.nekochat;
 
 import com.zhouyi.nekochat.commands.AICommand;
+import com.zhouyi.nekochat.commands.AIBanCommand;
 import com.zhouyi.nekochat.commands.CBanCommand;
 import com.zhouyi.nekochat.commands.CWhitelistCommand;
 import com.zhouyi.nekochat.commands.MuteCommand;
@@ -107,6 +108,12 @@ public class NekoChat extends JavaPlugin {
             aiCmd.setTabCompleter(new AICommand(this));
         }
 
+        var aibanCmd = getCommand("aiban");
+        if (aibanCmd != null) {
+            aibanCmd.setExecutor(new AIBanCommand(this));
+            aibanCmd.setTabCompleter(new AIBanCommand(this));
+        }
+
         // 注册事件监听
         getServer().getPluginManager().registerEvents(new ChatListener(this), this);
         getServer().getPluginManager().registerEvents(new ServerMessageListener(this), this);
@@ -148,6 +155,7 @@ public class NekoChat extends JavaPlugin {
             config.set("ai.cooldown-seconds", 20);
             config.set("ai.public-reply", true);
             config.set("ai.display-name", "&b[AI助手]");
+            config.set("ai.daily-limit", 10);
             config.set("ai.prompts.翻译", "你是一个翻译助手，请将用户的输入翻译成英文，只输出翻译结果。");
             config.set("ai.prompts.笑话", "你是一个讲笑话的 AI，用中文讲一个简短有趣的笑话。");
             config.set("ai.prompts.代码", "你是编程专家，用中文解释代码问题，给出简洁的代码示例。");

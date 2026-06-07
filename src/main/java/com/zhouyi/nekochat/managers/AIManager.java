@@ -4,13 +4,19 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.zhouyi.nekochat.NekoChat;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -24,6 +30,16 @@ public class AIManager {
 
     // 每个玩家的冷却时间（毫秒）
     private final Map<UUID, Long> cooldowns = new HashMap<>();
+
+    // 每日使用次数限制
+    private int dailyLimit;
+    private int currentDay; // 当前日期（年积日）
+    private final Map<UUID, Integer> dailyUsage = new HashMap<>();
+
+    // AI 封禁玩家名单（小写名称）
+    private final Set<String> aiBannedPlayers = new HashSet<>();
+    private File banDataFile;
+    private FileConfiguration banData;
 
     private boolean enabled;
     private String apiUrl;
@@ -43,7 +59,33 @@ public class AIManager {
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(10))
                 .build();
+        loadBanData();
         reload();
+    }
+
+    private void loadBanData() {
+        banDataFile = new File(plugin.getDataFolder(), "aibans.yml");
+        if (!banDataFile.exists()) {
+            try {
+                banDataFile.getParentFile().mkdirs();
+                banDataFile.createNewFile();
+            } catch (IOException e) {
+                plugin.getLogger().severe("§c[NekoChat-ERROR]§r 无法创建 aibans.yml: " + e.getMessage());
+            }
+        }
+        banData = YamlConfiguration.loadConfiguration(banDataFile);
+        aiBannedPlayers.clear();
+        aiBannedPlayers.addAll(banData.getStringList("banned"));
+    }
+
+    private void saveBanData() {
+        if (banData == null) return;
+        banData.set("banned", aiBannedPlayers.stream().toList());
+        try {
+            banData.save(banDataFile);
+        } catch (IOException e) {
+            plugin.getLogger().severe("§c[NekoChat-ERROR]§r 无法保存 aibans.yml: " + e.getMessage());
+        }
     }
 
     /**
@@ -66,6 +108,14 @@ public class AIManager {
         cooldownSeconds = config.getInt("cooldown-seconds", 20);
         publicReply = config.getBoolean("public-reply", true);
         displayName = config.getString("display-name", "&b[AI助手]");
+        dailyLimit = config.getInt("daily-limit", 10);
+
+        // 重置每日计数（新的一天）
+        int today = LocalDate.now().getDayOfYear();
+        if (today != currentDay) {
+            currentDay = today;
+            dailyUsage.clear();
+        }
 
         // 加载自定义提示词
         customPrompts.clear();
@@ -153,10 +203,69 @@ public class AIManager {
     public static String[] parseMentionMessage(String rawMessage) {
         String content = rawMessage.trim().substring(3).trim(); // 去掉 @ai
         if (content.isEmpty()) return new String[]{null, ""};
-
-        // 检查第一个词是否是自定义提示词
-        // 这个需要从实例获取，所以这里只解析，不判断
         return new String[]{null, content};
+    }
+
+    // ====== AI 封禁系统 ======
+
+    /**
+     * 检查玩家是否被禁止使用 AI
+     */
+    public boolean isAiBanned(String playerName) {
+        return aiBannedPlayers.contains(playerName.toLowerCase());
+    }
+
+    /**
+     * 封禁玩家使用 AI
+     */
+    public void banPlayer(String playerName) {
+        aiBannedPlayers.add(playerName.toLowerCase());
+        saveBanData();
+    }
+
+    /**
+     * 解除玩家 AI 封禁
+     */
+    public void unbanPlayer(String playerName) {
+        aiBannedPlayers.remove(playerName.toLowerCase());
+        saveBanData();
+    }
+
+    /**
+     * 获取所有被 AI 封禁的玩家名
+     */
+    public Set<String> getAiBannedPlayers() {
+        return new HashSet<>(aiBannedPlayers);
+    }
+
+    // ====== 每日使用限制 ======
+
+    /**
+     * 获取玩家今日已使用的次数
+     */
+    public int getDailyUsage(UUID playerUuid) {
+        return dailyUsage.getOrDefault(playerUuid, 0);
+    }
+
+    /**
+     * 检查玩家是否已达每日上限
+     */
+    public boolean isDailyLimitReached(UUID playerUuid) {
+        return dailyLimit > 0 && getDailyUsage(playerUuid) >= dailyLimit;
+    }
+
+    /**
+     * 获取每日最大使用次数
+     */
+    public int getDailyLimit() {
+        return dailyLimit;
+    }
+
+    /**
+     * 增加玩家今日使用次数
+     */
+    public void incrementDailyUsage(UUID playerUuid) {
+        dailyUsage.put(playerUuid, getDailyUsage(playerUuid) + 1);
     }
 
     /**
