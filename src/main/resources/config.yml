@@ -66,3 +66,32 @@ server-ad-message: "&c请勿宣传其他服务器！"
 server-ad-whitelist:
   - "3d3k.org"
   - "3d3k.discourse.group"
+
+# === AI 助手 ===
+# 支持任何 OpenAI 兼容 API（OpenAI、ModelScope、Azure OpenAI 等）
+ai:
+  # 是否启用 AI 功能
+  enabled: false
+  # OpenAI 兼容 API 地址
+  # ModelScope: https://api-inference.modelscope.cn/v1/chat/completions
+  # OpenAI:     https://api.openai.com/v1/chat/completions
+  # 自定义:     你的 API 地址 + /chat/completions
+  api-url: "https://api-inference.modelscope.cn/v1/chat/completions"
+  # API 密钥
+  api-key: ""
+  # 模型名称
+  # ModelScope 示例: Qwen/Qwen2.5-7B-Instruct
+  # OpenAI 示例:     gpt-4o-mini
+  model: "Qwen/Qwen2.5-7B-Instruct"
+  # 系统提示词
+  system-prompt: "你是 NekoChat AI，一个 Minecraft 服务器中的智能助手。请用中文回复，回答简洁友好。每次回答不要太长。"
+  # 单次最大 Token 数
+  max-tokens: 512
+  # API 请求超时（秒）
+  timeout-seconds: 30
+  # 玩家冷却时间（秒）
+  cooldown-seconds: 5
+  # 回复是否发送到公聊（true=全服广播，false=仅提问者可见）
+  public-reply: true
+  # AI 显示名称（支持 & 颜色代码）
+  display-name: "&b[AI助手]"

@@ -32,6 +32,11 @@ commands:
       /nchat op add <玩家>    - 添加管理员
       /nchat op remove <玩家> - 移除管理员
       /nchat op list          - 查看管理员列表
+  ai:
+    description: AI 助手（支持 OpenAI 兼容 API）
+    usage: |
+      /ai <消息>      - 向 AI 提问
+      /ai reload      - 重新加载 AI 配置
 
 permissions:
   nekochat.nchat:

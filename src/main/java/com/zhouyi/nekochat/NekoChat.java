@@ -1,5 +1,6 @@
 package com.zhouyi.nekochat;
 
+import com.zhouyi.nekochat.commands.AICommand;
 import com.zhouyi.nekochat.commands.CBanCommand;
 import com.zhouyi.nekochat.commands.CWhitelistCommand;
 import com.zhouyi.nekochat.commands.MuteCommand;
@@ -8,6 +9,7 @@ import com.zhouyi.nekochat.commands.PTitleCommand;
 import com.zhouyi.nekochat.commands.UnmuteCommand;
 import com.zhouyi.nekochat.listeners.ChatListener;
 import com.zhouyi.nekochat.listeners.ServerMessageListener;
+import com.zhouyi.nekochat.managers.AIManager;
 import com.zhouyi.nekochat.managers.CBanManager;
 import com.zhouyi.nekochat.managers.DatabaseManager;
 import com.zhouyi.nekochat.managers.MuteManager;
@@ -34,6 +36,7 @@ public class NekoChat extends JavaPlugin {
     private MuteManager muteManager;
     private DatabaseManager databaseManager;
     private OpManager opManager;
+    private AIManager aiManager;
     private MiniMessage miniMessage;
 
     // URL 正则（公开给其他类使用）
@@ -56,6 +59,7 @@ public class NekoChat extends JavaPlugin {
         this.muteManager = new MuteManager(this);
         this.databaseManager = new DatabaseManager(this);
         this.opManager = new OpManager(this);
+        this.aiManager = new AIManager(this);
 
         // 注册命令
         var ptitleCmd = getCommand("ptitle");
@@ -92,6 +96,12 @@ public class NekoChat extends JavaPlugin {
         if (nchatCmd != null) {
             nchatCmd.setExecutor(new NChatCommand(this));
             nchatCmd.setTabCompleter(new NChatCommand(this));
+        }
+
+        var aiCmd = getCommand("ai");
+        if (aiCmd != null) {
+            aiCmd.setExecutor(new AICommand(this));
+            aiCmd.setTabCompleter(new AICommand(this));
         }
 
         // 注册事件监听
@@ -138,6 +148,10 @@ public class NekoChat extends JavaPlugin {
 
     public OpManager getOpManager() {
         return opManager;
+    }
+
+    public AIManager getAIManager() {
+        return aiManager;
     }
 
     /**

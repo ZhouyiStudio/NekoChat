@@ -146,6 +146,17 @@ public class DatabaseManager {
         return logChat("[Server]", null, message, "system");
     }
 
+    /**
+     * 记录 AI 交互记录
+     *
+     * @param playerName 提问的玩家名称
+     * @param question   玩家的问题
+     * @param answer     AI 的回答
+     */
+    public CompletableFuture<Void> logAIInteraction(String playerName, String question, String answer) {
+        return logChat(playerName, null, "Q: " + question + " | A: " + answer, "ai");
+    }
+
     public boolean isEnabled() {
         return enabled;
     }
