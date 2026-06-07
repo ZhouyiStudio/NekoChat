@@ -106,13 +106,13 @@ public class WhisperCommand implements CommandExecutor, TabCompleter {
                 ))
                 .clickEvent(ClickEvent.suggestCommand("/tpa " + clickTarget));
 
-        // 消息内容 — 点击回复
+        // 消息内容 — 点击复制
         Component msgPart = Component.text(msg)
                 .color(MSG_COLOR)
                 .hoverEvent(HoverEvent.showText(
-                        Component.text("§a点击回复 " + clickTarget)
+                        Component.text("§7点击复制消息")
                 ))
-                .clickEvent(ClickEvent.suggestCommand("/msg " + clickTarget + " "));
+                .clickEvent(ClickEvent.copyToClipboard(msg));
 
         return Component.empty()
                 .append(Component.text("[").color(NamedTextColor.GRAY))
