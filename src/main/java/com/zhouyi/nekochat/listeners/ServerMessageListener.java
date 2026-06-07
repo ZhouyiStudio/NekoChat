@@ -39,7 +39,8 @@ public class ServerMessageListener implements Listener {
             }
         }
 
-        Component processed = plugin.processMessage(message);
+        String prefix = plugin.getConfig().getString("say-prefix", "&7[服务器]");
+        Component processed = plugin.colorize(prefix + " &r").append(plugin.processMessage(message));
         event.setCancelled(true);
         Bukkit.broadcast(processed);
     }
@@ -64,7 +65,8 @@ public class ServerMessageListener implements Listener {
 
             Component processed = plugin.processMessage(message);
             event.setCancelled(true);
-            Bukkit.broadcast(processed);
+            String prefix = plugin.getConfig().getString("say-prefix", "&7[服务器]");
+            Bukkit.broadcast(plugin.colorize(prefix + " &r").append(processed));
             return;
         }
     }

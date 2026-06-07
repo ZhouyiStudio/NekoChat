@@ -108,6 +108,10 @@ ai:
 # === 公告 ===
 broadcast-prefix: "&6[公告]"
 
+# === 服务器消息 ===
+# 控制台 /say 和玩家 /say 的前缀
+say-prefix: "&7[服务器]"
+
 # === 进服/退服消息 ===
 # 是否使用自定义进服/退服消息格式（false = 使用原版消息）
 custom-join-quit-message: true
