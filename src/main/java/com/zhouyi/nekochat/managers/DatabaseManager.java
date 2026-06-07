@@ -128,6 +128,18 @@ public class DatabaseManager {
     }
 
     /**
+     * 记录私聊消息
+     *
+     * @param playerName   发送者名称
+     * @param playerUuid   发送者 UUID
+     * @param targetPlayer 接收者名称
+     * @param message      消息内容
+     */
+    public CompletableFuture<Void> logPrivateChat(String playerName, String playerUuid, String targetPlayer, String message) {
+        return logChat(playerName, playerUuid, "-> " + targetPlayer + " : " + message, "whisper");
+    }
+
+    /**
      * 记录服务器消息
      */
     public CompletableFuture<Void> logServerMessage(String message) {
