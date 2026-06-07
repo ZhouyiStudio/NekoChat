@@ -90,7 +90,7 @@ public class TitleManager {
                 dataFile.getParentFile().mkdirs();
                 dataFile.createNewFile();
             } catch (IOException e) {
-                plugin.getLogger().severe("无法创建 titles.yml: " + e.getMessage());
+                plugin.getLogger().severe("§c[NekoChat-ERROR]§r 无法创建 titles.yml: " + e.getMessage());
                 return;
             }
         }
@@ -103,7 +103,7 @@ public class TitleManager {
                     titles.put(uuid, title);
                 }
             } catch (IllegalArgumentException e) {
-                plugin.getLogger().warning("无效的UUID: " + key);
+                plugin.getLogger().warning("§e[NekoChat-WARN]§r 无效的UUID: " + key);
             }
         }
     }
@@ -119,7 +119,7 @@ public class TitleManager {
         try {
             data.save(dataFile);
         } catch (IOException e) {
-            plugin.getLogger().severe("无法保存 titles.yml: " + e.getMessage());
+            plugin.getLogger().severe("§c[NekoChat-ERROR]§r 无法保存 titles.yml: " + e.getMessage());
         }
     }
 }

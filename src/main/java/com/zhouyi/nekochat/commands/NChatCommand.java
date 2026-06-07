@@ -68,7 +68,7 @@ public class NChatCommand implements CommandExecutor, TabCompleter {
         plugin.getDatabaseManager().reload();
 
         sender.sendMessage(plugin.colorize("&a配置文件已重新加载！"));
-        plugin.getLogger().info(sender.getName() + " 执行了 /nchat reload");
+        plugin.getLogger().info("§6[NekoChat]§r 管理员 " + sender.getName() + " 执行了重载");
     }
 
     private void handleOp(CommandSender sender, String[] args) {
@@ -91,7 +91,7 @@ public class NChatCommand implements CommandExecutor, TabCompleter {
                 String targetName = args[2];
                 plugin.getOpManager().add(targetName);
                 sender.sendMessage(plugin.colorize("&a已将 &e" + targetName + " &a添加为 NekoChat 管理员！"));
-                plugin.getLogger().info(sender.getName() + " 添加了管理员: " + targetName);
+                plugin.getLogger().info("§6[NekoChat]§r 管理员 " + sender.getName() + " 添加了管理员: " + targetName);
             }
             case "remove", "del", "delete" -> {
                 if (args.length < 3) {
@@ -105,7 +105,7 @@ public class NChatCommand implements CommandExecutor, TabCompleter {
                 }
                 plugin.getOpManager().remove(targetName);
                 sender.sendMessage(plugin.colorize("&a已移除 &e" + targetName + " &a的 NekoChat 管理员权限！"));
-                plugin.getLogger().info(sender.getName() + " 移除了管理员: " + targetName);
+                plugin.getLogger().info("§6[NekoChat]§r 管理员 " + sender.getName() + " 移除了管理员: " + targetName);
             }
             case "list" -> {
                 Set<String> ops = plugin.getOpManager().getOps();

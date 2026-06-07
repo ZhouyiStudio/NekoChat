@@ -28,13 +28,13 @@ public class DatabaseManager {
     private void init() {
         var config = plugin.getConfig().getConfigurationSection("database");
         if (config == null) {
-            plugin.getLogger().info("未配置数据库，聊天记录功能已跳过。");
+            plugin.getLogger().info("§e[NekoChat] 未配置数据库，聊天记录功能已跳过。");
             return;
         }
 
         String host = config.getString("host");
         if (host == null || host.isEmpty()) {
-            plugin.getLogger().info("数据库 host 为空，聊天记录功能已跳过。");
+            plugin.getLogger().info("§e[NekoChat] 数据库 host 为空，聊天记录功能已跳过。");
             return;
         }
 
@@ -63,9 +63,9 @@ public class DatabaseManager {
             // 创建表
             createTables();
 
-            plugin.getLogger().info("MySQL 连接成功！聊天记录将写入 " + host + "/" + database);
+            plugin.getLogger().info("§a[NekoChat] MySQL 连接成功！聊天记录将写入 " + host + "/" + database);
         } catch (Exception e) {
-            plugin.getLogger().severe("MySQL 连接失败: " + e.getMessage());
+            plugin.getLogger().severe("§c[NekoChat] MySQL 连接失败: " + e.getMessage());
             enabled = false;
         }
     }
@@ -111,7 +111,7 @@ public class DatabaseManager {
                 stmt.setLong(5, now);
                 stmt.executeUpdate();
                 if (plugin.isDebug()) {
-                    plugin.getLogger().info("[DEBUG] DB写入成功: " + playerName + " [" + type + "]");
+                    plugin.getLogger().info("§7[NekoChat] 聊天记录已写入: " + playerName + " [" + type + "]");
                 }
 
             } catch (SQLException e) {

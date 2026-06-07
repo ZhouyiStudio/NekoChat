@@ -35,7 +35,7 @@ public class ServerMessageListener implements Listener {
         if (db.isEnabled()) {
             db.logServerMessage(message);
             if (plugin.isDebug()) {
-                plugin.getLogger().info("[DEBUG] 已写入服务器消息: " + message);
+                plugin.getLogger().info("§7[NekoChat-DEBUG]§r 已写入服务器消息: " + message);
             }
         }
 
@@ -63,7 +63,7 @@ public class ServerMessageListener implements Listener {
             if (db.isEnabled()) {
                 db.logPlayerChat(player.getName(), player.getUniqueId().toString(), "/say " + message);
                 if (plugin.isDebug()) {
-                    plugin.getLogger().info("[DEBUG] 已写入玩家 /say: " + player.getName() + " -> " + message);
+                    plugin.getLogger().info("§7[NekoChat-DEBUG]§r 已写入玩家 /say: " + player.getName() + " -> " + message);
                 }
             }
 
@@ -99,7 +99,7 @@ public class ServerMessageListener implements Listener {
                 if (db.isEnabled()) {
                     db.logPrivateChat(player.getName(), player.getUniqueId().toString(), targetPlayer, message);
                     if (plugin.isDebug()) {
-                        plugin.getLogger().info("[DEBUG] 已写入私聊记录: " + player.getName() + " -> " + targetPlayer + " : " + message);
+                        plugin.getLogger().info("§7[NekoChat-DEBUG]§r 已写入私聊记录: " + player.getName() + " -> " + targetPlayer + " : " + message);
                     }
                 }
                 break;

@@ -98,8 +98,10 @@ public class NekoChat extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ChatListener(this), this);
         getServer().getPluginManager().registerEvents(new ServerMessageListener(this), this);
 
-        getLogger().info("NekoChat 聊天管理系统 已启用!");
-        getLogger().info("作者: Zhouyi | GitHub: https://github.com/ZhouyiStudio/NekoChat");
+        getLogger().info("============================================================");
+        getLogger().info("              NekoChat 聊天管理系统 已启用!");
+        getLogger().info("      作者: Zhouyi | GitHub: https://github.com/ZhouyiStudio/NekoChat");
+        getLogger().info("============================================================");
     }
 
     @Override
@@ -109,7 +111,9 @@ public class NekoChat extends JavaPlugin {
         if (cbanManager != null) cbanManager.save();
         if (muteManager != null) muteManager.save();
         if (databaseManager != null) databaseManager.shutdown();
-        getLogger().info("NekoChat 已禁用！");
+        getLogger().info("============================================================");
+        getLogger().info("                    NekoChat 已禁用！");
+        getLogger().info("============================================================");
     }
 
     public static NekoChat getInstance() {

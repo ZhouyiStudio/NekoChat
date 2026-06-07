@@ -136,7 +136,7 @@ public class MuteManager {
                 dataFile.getParentFile().mkdirs();
                 dataFile.createNewFile();
             } catch (IOException e) {
-                plugin.getLogger().severe("无法创建 mute.yml: " + e.getMessage());
+                plugin.getLogger().severe("§c[NekoChat-ERROR] 无法创建 mute.yml: " + e.getMessage());
                 return;
             }
         }
@@ -157,7 +157,7 @@ public class MuteManager {
                     mutedPlayers.put(uuid, expiry);
                 }
             } catch (IllegalArgumentException e) {
-                plugin.getLogger().warning("无效的UUID: " + key);
+                plugin.getLogger().warning("§e[NekoChat-WARN] 无效的UUID: " + key);
             }
         }
     }
@@ -182,7 +182,7 @@ public class MuteManager {
         try {
             data.save(dataFile);
         } catch (IOException e) {
-            plugin.getLogger().severe("无法保存 mute.yml: " + e.getMessage());
+                plugin.getLogger().severe("§c[NekoChat-ERROR] 无法保存 mute.yml: " + e.getMessage());
         }
     }
 }

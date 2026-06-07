@@ -65,10 +65,10 @@ public class ChatListener implements Listener {
         if (db.isEnabled()) {
             db.logPlayerChat(player.getName(), player.getUniqueId().toString(), plainText);
             if (plugin.isDebug()) {
-                plugin.getLogger().info("[DEBUG] 已写入聊天记录: " + player.getName() + " -> " + plainText);
+                plugin.getLogger().info("§7[NekoChat-DEBUG]§r 聊天记录已保存: " + player.getName() + " -> " + plainText);
             }
         } else if (plugin.isDebug()) {
-            plugin.getLogger().info("[DEBUG] 数据库未启用，跳过写入: " + player.getName() + " -> " + plainText);
+            plugin.getLogger().info("§7[NekoChat-DEBUG]§r 数据库未启用，跳过聊天记录保存: " + player.getName() + " -> " + plainText);
         }
 
         // 5. 构建带颜色代码 + 可点击 URL 的消息组件

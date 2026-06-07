@@ -66,7 +66,7 @@ public class OpManager {
                 dataFile.getParentFile().mkdirs();
                 dataFile.createNewFile();
             } catch (IOException e) {
-                plugin.getLogger().severe("无法创建 ops.yml: " + e.getMessage());
+                plugin.getLogger().severe("§c[NekoChat-ERROR]§r 无法创建 ops.yml: " + e.getMessage());
                 return;
             }
         }
@@ -94,7 +94,7 @@ public class OpManager {
         try {
             data.save(dataFile);
         } catch (IOException e) {
-            plugin.getLogger().severe("无法保存 ops.yml: " + e.getMessage());
+            plugin.getLogger().severe("§c[NekoChat-ERROR]§r 无法保存 ops.yml: " + e.getMessage());
         }
     }
 }
