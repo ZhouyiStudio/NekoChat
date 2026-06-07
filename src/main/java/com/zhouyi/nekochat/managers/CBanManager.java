@@ -49,6 +49,12 @@ public class CBanManager {
 
     public boolean containsBannedWord(String message) {
         String lower = message.toLowerCase();
+
+        // 白名单放行（包含白名单词汇的消息跳过屏蔽词检测）
+        if (isWhitelisted(lower)) {
+            return false;
+        }
+
         for (String word : bannedWords) {
             if (lower.contains(word)) {
                 return true;
