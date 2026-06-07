@@ -2,6 +2,7 @@ package com.zhouyi.nekochat;
 
 import com.zhouyi.nekochat.commands.AICommand;
 import com.zhouyi.nekochat.commands.AIBanCommand;
+import com.zhouyi.nekochat.commands.BroadcastCommand;
 import com.zhouyi.nekochat.commands.CBanCommand;
 import com.zhouyi.nekochat.commands.CWhitelistCommand;
 import com.zhouyi.nekochat.commands.MuteCommand;
@@ -123,6 +124,11 @@ public class NekoChat extends JavaPlugin {
             var whisperExecutor = new WhisperCommand(this);
             msgCmd.setExecutor(whisperExecutor);
             msgCmd.setTabCompleter(whisperExecutor);
+        }
+
+        var broadcastCmd = getCommand("broadcast");
+        if (broadcastCmd != null) {
+            broadcastCmd.setExecutor(new BroadcastCommand(this));
         }
 
         // 注册事件监听

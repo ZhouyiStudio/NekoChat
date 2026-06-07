@@ -13,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 public class ChatListener implements Listener {
 
@@ -191,8 +192,30 @@ public class ChatListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
+
+        // 设置 Tab 列表头衔
         if (plugin.getTitleManager().hasTitle(player)) {
             player.playerListName(plugin.getTitleManager().getTabName(player));
+        }
+
+        // 自定义加入消息
+        boolean customJoin = plugin.getConfig().getBoolean("custom-join-quit-message", true);
+        if (customJoin) {
+            String format = plugin.getConfig().getString("join-message-format",
+                    "&7[&a+&7] &e{player}");
+            event.joinMessage(plugin.colorize(format.replace("{player}", player.getName())));
+        }
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+
+        boolean customQuit = plugin.getConfig().getBoolean("custom-join-quit-message", true);
+        if (customQuit) {
+            String format = plugin.getConfig().getString("quit-message-format",
+                    "&7[&c-&7] &e{player}");
+            event.quitMessage(plugin.colorize(format.replace("{player}", player.getName())));
         }
     }
 }

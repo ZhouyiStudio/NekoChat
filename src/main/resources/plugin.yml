@@ -48,6 +48,9 @@ commands:
     description: 发送私聊消息
     usage: /msg <玩家> <消息>
     aliases: [tell, w, whisper]
+  broadcast:
+    description: 发送全服公告
+    usage: /broadcast <消息>
 
 permissions:
   nekochat.nchat:
