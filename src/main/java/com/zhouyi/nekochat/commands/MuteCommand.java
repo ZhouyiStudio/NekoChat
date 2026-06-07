@@ -30,26 +30,26 @@ public class MuteCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
                              @NotNull String label, @NotNull String[] args) {
         if (!plugin.isAdmin(sender)) {
-            sender.sendMessage(plugin.colorize("&c你没有权限执行此命令！"));
+            sender.sendMessage(plugin.msg("no-permission"));
             return true;
         }
 
         if (args.length < 1) {
-            sender.sendMessage(plugin.colorize("&c用法: /mute <玩家> [时间] [原因]"));
-            sender.sendMessage(plugin.colorize("&7时间格式: 数字+单位(s/m/h/d)，例如: 30s, 5m, 2h, 1d"));
-            sender.sendMessage(plugin.colorize("&7不写时间则为永久禁言，不写原因则默认"));
+            sender.sendMessage(plugin.msg("mute-usage"));
+            sender.sendMessage(plugin.msg("mute-duration-format"));
+            sender.sendMessage(plugin.msg("mute-permanent-default"));
             return true;
         }
 
         Player target = Bukkit.getPlayerExact(args[0]);
         if (target == null) {
-            sender.sendMessage(plugin.colorize("&c玩家 " + args[0] + " 不在线！"));
+            sender.sendMessage(plugin.msg("player-not-online", args[0]));
             return true;
         }
 
         // 检查目标是否有 bypass 权限
         if (target.hasPermission("nekochat.bypass.mute")) {
-            sender.sendMessage(plugin.colorize("&c无法禁言该玩家！"));
+            sender.sendMessage(plugin.msg("mute-cannot-mute"));
             return true;
         }
 
@@ -94,10 +94,10 @@ public class MuteCommand implements CommandExecutor, TabCompleter {
         // 广播禁言公告
         String reasonText = (reason != null && !reason.isEmpty()) ? "，原因: " + reason : "";
         if (duration == -1) {
-            Bukkit.broadcast(plugin.colorize("&c" + target.getName() + " &e已被永久禁言" + reasonText + "！"));
+            Bukkit.broadcast(plugin.msg("mute-broadcast-permanent", target.getName(), reasonText));
         } else {
             String timeStr = formatDuration(duration);
-            Bukkit.broadcast(plugin.colorize("&c" + target.getName() + " &e已被禁言 " + timeStr + reasonText + "！"));
+            Bukkit.broadcast(plugin.msg("mute-broadcast-temporary", target.getName(), timeStr, reasonText));
         }
 
         return true;

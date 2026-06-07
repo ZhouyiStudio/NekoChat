@@ -27,41 +27,41 @@ public class AIBanCommand implements CommandExecutor, TabCompleter {
                              @NotNull String label, @NotNull String[] args) {
         // 只有管理员（通过 /nchat op add 添加的）可以使用
         if (!plugin.isAdmin(sender)) {
-            sender.sendMessage(plugin.colorize("&c你没有权限执行此命令！"));
+            sender.sendMessage(plugin.msg("no-permission"));
             return true;
         }
 
         if (args.length == 0) {
-            sender.sendMessage(plugin.colorize("&6=== AI 封禁管理 ==="));
-            sender.sendMessage(plugin.colorize("&e/aiban <玩家> &7- 禁止玩家使用 AI"));
-            sender.sendMessage(plugin.colorize("&e/aiban remove <玩家> &7- 解除 AI 封禁"));
-            sender.sendMessage(plugin.colorize("&e/aiban list &7- 查看被封禁的玩家"));
+            sender.sendMessage(plugin.msg("aiban-help-header"));
+            sender.sendMessage(plugin.msg("aiban-help-ban"));
+            sender.sendMessage(plugin.msg("aiban-help-remove"));
+            sender.sendMessage(plugin.msg("aiban-help-list"));
             return true;
         }
 
         switch (args[0].toLowerCase()) {
             case "remove", "del", "delete" -> {
                 if (args.length < 2) {
-                    sender.sendMessage(plugin.colorize("&c用法: /aiban remove <玩家>"));
+                    sender.sendMessage(plugin.msg("aiban-usage-remove"));
                     return true;
                 }
                 String target = args[1];
                 if (!plugin.getAIManager().isAiBanned(target)) {
-                    sender.sendMessage(plugin.colorize("&e" + target + " &c当前未被封禁。"));
+                    sender.sendMessage(plugin.msg("aiban-not-banned", target));
                     return true;
                 }
                 plugin.getAIManager().unbanPlayer(target);
-                sender.sendMessage(plugin.colorize("&a已解除 &e" + target + " &a的 AI 封禁。"));
+                sender.sendMessage(plugin.msg("aiban-unbanned", target));
                 plugin.getLogger().info("§6[NekoChat]§r 管理员 " + sender.getName() + " 解除了 " + target + " 的 AI 封禁");
             }
             case "list" -> {
                 var banned = plugin.getAIManager().getAiBannedPlayers();
                 if (banned.isEmpty()) {
-                    sender.sendMessage(plugin.colorize("&e当前没有被 AI 封禁的玩家。"));
+                    sender.sendMessage(plugin.msg("aiban-list-empty"));
                 } else {
-                    sender.sendMessage(plugin.colorize("&6=== AI 封禁列表 (" + banned.size() + "个) ==="));
+                    sender.sendMessage(plugin.msg("aiban-list-header", String.valueOf(banned.size())));
                     for (String name : banned) {
-                        sender.sendMessage(plugin.colorize("&7- &e" + name));
+                        sender.sendMessage(plugin.msg("aiban-list-item", name));
                     }
                 }
             }
@@ -69,11 +69,11 @@ public class AIBanCommand implements CommandExecutor, TabCompleter {
                 // /aiban <玩家>
                 String target = args[0];
                 if (plugin.getAIManager().isAiBanned(target)) {
-                    sender.sendMessage(plugin.colorize("&e" + target + " &c已被封禁。"));
+                    sender.sendMessage(plugin.msg("aiban-already-banned", target));
                     return true;
                 }
                 plugin.getAIManager().banPlayer(target);
-                sender.sendMessage(plugin.colorize("&c已将 &e" + target + " &c禁止使用 AI 助手。"));
+                sender.sendMessage(plugin.msg("aiban-banned", target));
                 plugin.getLogger().info("§6[NekoChat]§r 管理员 " + sender.getName() + " 封禁了 " + target + " 的 AI 使用权限");
             }
         }

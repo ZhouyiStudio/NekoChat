@@ -24,21 +24,22 @@ public class CBanCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
                              @NotNull String label, @NotNull String[] args) {
         if (!plugin.isAdmin(sender)) {
-            sender.sendMessage(plugin.colorize("&c你没有权限执行此命令！"));
+            sender.sendMessage(plugin.msg("no-permission"));
             return true;
         }
 
         if (args.length < 1) {
-            sender.sendMessage(plugin.colorize("&6/cban add <词汇> &e- 添加屏蔽词"));
-            sender.sendMessage(plugin.colorize("&6/cban remove <词汇> &e- 移除屏蔽词"));
-            sender.sendMessage(plugin.colorize("&6/cban list &e- 查看所有屏蔽词"));
+            sender.sendMessage(plugin.msg("cban-help-header"));
+            sender.sendMessage(plugin.msg("cban-help-add"));
+            sender.sendMessage(plugin.msg("cban-help-remove"));
+            sender.sendMessage(plugin.msg("cban-help-list"));
             return true;
         }
 
         switch (args[0].toLowerCase()) {
             case "add" -> {
                 if (args.length < 2) {
-                    sender.sendMessage(plugin.colorize("&c请指定要屏蔽的词汇！用法: /cban add <词汇>"));
+                    sender.sendMessage(plugin.msg("cban-usage-add"));
                     return true;
                 }
                 StringBuilder sb = new StringBuilder();
@@ -48,11 +49,11 @@ public class CBanCommand implements CommandExecutor, TabCompleter {
                 }
                 String word = sb.toString().toLowerCase();
                 plugin.getCBanManager().addWord(word);
-                sender.sendMessage(plugin.colorize("&a已添加屏蔽词: &e" + word));
+                sender.sendMessage(plugin.msg("cban-added", word));
             }
             case "remove", "del", "delete" -> {
                 if (args.length < 2) {
-                    sender.sendMessage(plugin.colorize("&c请指定要移除的词汇！用法: /cban remove <词汇>"));
+                    sender.sendMessage(plugin.msg("cban-usage-remove"));
                     return true;
                 }
                 StringBuilder sb = new StringBuilder();
@@ -62,16 +63,16 @@ public class CBanCommand implements CommandExecutor, TabCompleter {
                 }
                 String word = sb.toString().toLowerCase();
                 plugin.getCBanManager().removeWord(word);
-                sender.sendMessage(plugin.colorize("&a已移除屏蔽词: &e" + word));
+                sender.sendMessage(plugin.msg("cban-removed", word));
             }
             case "list" -> {
                 List<String> words = plugin.getCBanManager().getBannedWords();
                 if (words.isEmpty()) {
-                    sender.sendMessage(plugin.colorize("&e当前没有屏蔽词。"));
+                    sender.sendMessage(plugin.msg("cban-list-empty"));
                 } else {
-                    sender.sendMessage(plugin.colorize("&6=== 屏蔽词列表 (" + words.size() + "个) ==="));
+                    sender.sendMessage(plugin.msg("cban-list-header", String.valueOf(words.size())));
                     for (String w : words) {
-                        sender.sendMessage(plugin.colorize("&7- &e" + w));
+                        sender.sendMessage(plugin.msg("cban-list-item", w));
                     }
                 }
             }

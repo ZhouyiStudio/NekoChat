@@ -23,21 +23,21 @@ public class CWhitelistCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
                              @NotNull String label, @NotNull String[] args) {
         if (!plugin.isAdmin(sender)) {
-            sender.sendMessage(plugin.colorize("&c你没有权限执行此命令！"));
+            sender.sendMessage(plugin.msg("no-permission"));
             return true;
         }
 
         if (args.length < 1) {
-            sender.sendMessage(plugin.colorize("&6/cwhitelist add <词汇> &e- 添加宣传检测白名单"));
-            sender.sendMessage(plugin.colorize("&6/cwhitelist remove <词汇> &e- 移除宣传检测白名单"));
-            sender.sendMessage(plugin.colorize("&6/cwhitelist list &e- 查看所有白名单词汇"));
+            sender.sendMessage(plugin.msg("cwhitelist-help-add"));
+            sender.sendMessage(plugin.msg("cwhitelist-help-remove"));
+            sender.sendMessage(plugin.msg("cwhitelist-help-list"));
             return true;
         }
 
         switch (args[0].toLowerCase()) {
             case "add" -> {
                 if (args.length < 2) {
-                    sender.sendMessage(plugin.colorize("&c请指定要添加的白名单词汇！用法: /cwhitelist add <词汇>"));
+                    sender.sendMessage(plugin.msg("cwhitelist-usage-add"));
                     return true;
                 }
                 StringBuilder sb = new StringBuilder();
@@ -47,11 +47,11 @@ public class CWhitelistCommand implements CommandExecutor, TabCompleter {
                 }
                 String word = sb.toString().toLowerCase();
                 plugin.getCBanManager().addWhitelistWord(word);
-                sender.sendMessage(plugin.colorize("&a已添加宣传白名单: &e" + word));
+                sender.sendMessage(plugin.msg("cwhitelist-added", word));
             }
             case "remove", "del", "delete" -> {
                 if (args.length < 2) {
-                    sender.sendMessage(plugin.colorize("&c请指定要移除的白名单词汇！用法: /cwhitelist remove <词汇>"));
+                    sender.sendMessage(plugin.msg("cwhitelist-usage-remove"));
                     return true;
                 }
                 StringBuilder sb = new StringBuilder();
@@ -61,16 +61,16 @@ public class CWhitelistCommand implements CommandExecutor, TabCompleter {
                 }
                 String word = sb.toString().toLowerCase();
                 plugin.getCBanManager().removeWhitelistWord(word);
-                sender.sendMessage(plugin.colorize("&a已移除宣传白名单: &e" + word));
+                sender.sendMessage(plugin.msg("cwhitelist-removed", word));
             }
             case "list" -> {
                 List<String> words = plugin.getCBanManager().getWhitelistWords();
                 if (words.isEmpty()) {
-                    sender.sendMessage(plugin.colorize("&e当前没有宣传白名单词汇。"));
+                    sender.sendMessage(plugin.msg("cwhitelist-list-empty"));
                 } else {
-                    sender.sendMessage(plugin.colorize("&6=== 宣传白名单列表 (" + words.size() + "个) ==="));
+                    sender.sendMessage(plugin.msg("cwhitelist-list-header", String.valueOf(words.size())));
                     for (String w : words) {
-                        sender.sendMessage(plugin.colorize("&7- &e" + w));
+                        sender.sendMessage(plugin.msg("cwhitelist-list-item", w));
                     }
                 }
             }

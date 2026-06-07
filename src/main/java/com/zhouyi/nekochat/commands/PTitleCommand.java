@@ -27,13 +27,13 @@ public class PTitleCommand implements CommandExecutor, TabCompleter {
                              @NotNull String label, @NotNull String[] args) {
 
         if (!plugin.isAdmin(sender)) {
-            sender.sendMessage(plugin.colorize("&c你没有权限执行此命令！"));
+            sender.sendMessage(plugin.msg("no-permission"));
             return true;
         }
 
         if (args.length < 1) {
-            sender.sendMessage(plugin.colorize("&6/ptitle add <玩家> <头衔> &e- 给玩家设置头衔（支持 & 颜色代码）"));
-            sender.sendMessage(plugin.colorize("&6/ptitle remove <玩家> &e- 移除玩家头衔"));
+            sender.sendMessage(plugin.msg("ptitle-help-add"));
+            sender.sendMessage(plugin.msg("ptitle-help-remove"));
             sender.sendMessage(plugin.colorize("&7示例: /ptitle add Steve &b&l大神"));
             return true;
         }
@@ -41,7 +41,7 @@ public class PTitleCommand implements CommandExecutor, TabCompleter {
         switch (args[0].toLowerCase()) {
             case "add" -> {
                 if (args.length < 3) {
-                    sender.sendMessage(plugin.colorize("&c用法: /ptitle add <玩家> <头衔>"));
+                    sender.sendMessage(plugin.msg("ptitle-usage-add"));
                     return true;
                 }
 
@@ -67,12 +67,12 @@ public class PTitleCommand implements CommandExecutor, TabCompleter {
 
                 plugin.getTitleManager().setTitle(target, title);
                 target.playerListName(plugin.getTitleManager().getTabName(target));
-                sender.sendMessage(plugin.colorize("&a已设置 " + target.getName() + " 的头衔为: " + title));
+                sender.sendMessage(plugin.msg("ptitle-added", target.getName(), title));
                 target.sendMessage(plugin.colorize("&a你的头衔已被设置为: " + title));
             }
             case "remove", "del", "delete", "clear" -> {
                 if (args.length < 2) {
-                    sender.sendMessage(plugin.colorize("&c用法: /ptitle remove <玩家>"));
+                    sender.sendMessage(plugin.msg("ptitle-usage-remove"));
                     return true;
                 }
 
@@ -84,7 +84,7 @@ public class PTitleCommand implements CommandExecutor, TabCompleter {
 
                 plugin.getTitleManager().removeTitle(target);
                 target.playerListName(target.name());
-                sender.sendMessage(plugin.colorize("&a已移除 " + target.getName() + " 的头衔！"));
+                sender.sendMessage(plugin.msg("ptitle-removed", target.getName()));
                 target.sendMessage(plugin.colorize("&a你的头衔已被移除！"));
             }
             default -> {

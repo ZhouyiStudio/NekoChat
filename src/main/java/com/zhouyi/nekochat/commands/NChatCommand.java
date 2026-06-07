@@ -41,26 +41,25 @@ public class NChatCommand implements CommandExecutor, TabCompleter {
     }
 
     private void showHelp(CommandSender sender) {
-        sender.sendMessage(plugin.colorize("&6=== NekoChat 聊天管理系统 ==="));
-        sender.sendMessage(plugin.colorize("&e/ptitle add <玩家> <头衔> &7- 设置玩家头衔"));
-        sender.sendMessage(plugin.colorize("&e/ptitle remove <玩家> &7- 移除玩家头衔"));
-        sender.sendMessage(plugin.colorize("&e/cban add/remove/list &7- 管理屏蔽词"));
-        sender.sendMessage(plugin.colorize("&e/cwhitelist add/remove/list &7- 管理宣传白名单"));
-        sender.sendMessage(plugin.colorize("&e/mute <玩家> [时间] &7- 禁言玩家"));
-        sender.sendMessage(plugin.colorize("&e/unmute <玩家> &7- 解除禁言"));
-        sender.sendMessage(plugin.colorize("&e/nchat &7- 显示本帮助"));
-        sender.sendMessage(plugin.colorize("&e/nchat reload &7- 重载所有配置"));
-        sender.sendMessage(plugin.colorize("&e/nchat reload ai &7- 仅重载 AI 配置"));
-        sender.sendMessage(plugin.colorize("&e/nchat op add <玩家> &7- 添加管理员"));
-        sender.sendMessage(plugin.colorize("&e/nchat op remove <玩家> &7- 移除管理员"));
-        sender.sendMessage(plugin.colorize("&e/nchat op list &7- 查看管理员列表"));
-        sender.sendMessage(plugin.colorize("&8GitHub: &7https://github.com/ZhouyiStudio/NekoChat"));
-        sender.sendMessage(plugin.colorize("&8Author: &7Zhouyi"));
+        sender.sendMessage(plugin.msg("nchat-help-header"));
+        sender.sendMessage(plugin.msg("nchat-help-ptitle"));
+        sender.sendMessage(plugin.msg("nchat-help-cban"));
+        sender.sendMessage(plugin.msg("nchat-help-cwhitelist"));
+        sender.sendMessage(plugin.msg("nchat-help-mute"));
+        sender.sendMessage(plugin.msg("nchat-help-unmute"));
+        sender.sendMessage(plugin.msg("nchat-help-nchat"));
+        sender.sendMessage(plugin.msg("nchat-help-reload"));
+        sender.sendMessage(plugin.msg("nchat-help-reload-ai"));
+        sender.sendMessage(plugin.msg("nchat-help-op-add"));
+        sender.sendMessage(plugin.msg("nchat-help-op-remove"));
+        sender.sendMessage(plugin.msg("nchat-help-op-list"));
+        sender.sendMessage(plugin.msg("nchat-help-github"));
+        sender.sendMessage(plugin.msg("nchat-help-author"));
     }
 
     private void handleReload(CommandSender sender, String[] args) {
         if (!plugin.isAdmin(sender)) {
-            sender.sendMessage(plugin.colorize("&c你没有权限执行此命令！"));
+            sender.sendMessage(plugin.msg("no-permission"));
             return;
         }
 
@@ -68,7 +67,7 @@ public class NChatCommand implements CommandExecutor, TabCompleter {
         if (args.length >= 2 && args[1].equalsIgnoreCase("ai")) {
             plugin.reloadConfig();
             plugin.getAIManager().reload();
-            sender.sendMessage(plugin.colorize("&aAI 配置已重新加载！"));
+            sender.sendMessage(plugin.msg("reload-ai-only"));
             plugin.getLogger().info("§6[NekoChat]§r " + sender.getName() + " 重载了 AI 配置");
             return;
         }
@@ -78,59 +77,60 @@ public class NChatCommand implements CommandExecutor, TabCompleter {
         plugin.getCBanManager().reload();
         plugin.getDatabaseManager().reload();
         plugin.getAIManager().reload();
-        sender.sendMessage(plugin.colorize("&a所有配置已重新加载！"));
+        plugin.getMessageManager().reload();
+        sender.sendMessage(plugin.msg("reload-all"));
         plugin.getLogger().info("§6[NekoChat]§r 管理员 " + sender.getName() + " 执行了全量重载");
     }
 
     private void handleOp(CommandSender sender, String[] args) {
         if (!plugin.isAdmin(sender)) {
-            sender.sendMessage(plugin.colorize("&c你没有权限执行此命令！"));
+            sender.sendMessage(plugin.msg("no-permission"));
             return;
         }
 
         if (args.length < 2) {
-            sender.sendMessage(plugin.colorize("&c用法: /nchat op add <玩家> | /nchat op remove <玩家> | /nchat op list"));
+            sender.sendMessage(plugin.msg("op-usage"));
             return;
         }
 
         switch (args[1].toLowerCase()) {
             case "add" -> {
                 if (args.length < 3) {
-                    sender.sendMessage(plugin.colorize("&c用法: /nchat op add <玩家>"));
+                    sender.sendMessage(plugin.msg("op-usage"));
                     return;
                 }
                 String targetName = args[2];
                 plugin.getOpManager().add(targetName);
-                sender.sendMessage(plugin.colorize("&a已将 &e" + targetName + " &a添加为 NekoChat 管理员！"));
+                sender.sendMessage(plugin.msg("op-added", targetName));
                 plugin.getLogger().info("§6[NekoChat]§r 管理员 " + sender.getName() + " 添加了管理员: " + targetName);
             }
             case "remove", "del", "delete" -> {
                 if (args.length < 3) {
-                    sender.sendMessage(plugin.colorize("&c用法: /nchat op remove <玩家>"));
+                    sender.sendMessage(plugin.msg("op-usage"));
                     return;
                 }
                 String targetName = args[2];
                 if (!plugin.getOpManager().isOp(targetName)) {
-                    sender.sendMessage(plugin.colorize("&e" + targetName + " &c当前不是 NekoChat 管理员。"));
+                    sender.sendMessage(plugin.msg("op-not-op", targetName));
                     return;
                 }
                 plugin.getOpManager().remove(targetName);
-                sender.sendMessage(plugin.colorize("&a已移除 &e" + targetName + " &a的 NekoChat 管理员权限！"));
+                sender.sendMessage(plugin.msg("op-removed", targetName));
                 plugin.getLogger().info("§6[NekoChat]§r 管理员 " + sender.getName() + " 移除了管理员: " + targetName);
             }
             case "list" -> {
                 Set<String> ops = plugin.getOpManager().getOps();
                 if (ops.isEmpty()) {
-                    sender.sendMessage(plugin.colorize("&e当前没有 NekoChat 管理员。"));
+                    sender.sendMessage(plugin.msg("op-help-empty"));
                 } else {
-                    sender.sendMessage(plugin.colorize("&6=== NekoChat 管理员列表 (" + ops.size() + "个) ==="));
+                    sender.sendMessage(plugin.msg("op-help-header", String.valueOf(ops.size())));
                     for (String name : ops) {
-                        sender.sendMessage(plugin.colorize("&7- &e" + name));
+                        sender.sendMessage(plugin.msg("op-help-item", name));
                     }
                 }
             }
             default -> {
-                sender.sendMessage(plugin.colorize("&c未知子命令！可用: add, remove, list"));
+                sender.sendMessage(plugin.msg("op-unknown"));
             }
         }
     }

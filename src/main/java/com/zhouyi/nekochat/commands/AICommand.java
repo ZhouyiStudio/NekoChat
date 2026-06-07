@@ -28,7 +28,7 @@ public class AICommand implements CommandExecutor, TabCompleter {
                              @NotNull String label, @NotNull String[] args) {
         // 检查 AI 是否启用
         if (!plugin.getAIManager().isEnabled()) {
-            sender.sendMessage(plugin.colorize("&cAI 功能未启用！请在 config.yml 中配置并启用。"));
+            sender.sendMessage(plugin.msg("ai-not-enabled"));
             return true;
         }
 
@@ -50,21 +50,21 @@ public class AICommand implements CommandExecutor, TabCompleter {
 
         // 检查 AI 封禁
         if (plugin.getAIManager().isAiBanned(player.getName())) {
-            player.sendMessage(plugin.colorize("&c你已被禁止使用 AI 助手！"));
+            player.sendMessage(plugin.msg("ai-banned"));
             return true;
         }
 
         // 检查每日使用限制
         if (plugin.getAIManager().isDailyLimitReached(player.getUniqueId())) {
             int limit = plugin.getAIManager().getDailyLimit();
-            player.sendMessage(plugin.colorize("&c你今天使用 AI 已达上限（" + limit + "次），明天再试吧！"));
+            player.sendMessage(plugin.msg("ai-daily-limit", String.valueOf(limit)));
             return true;
         }
 
         // 检查冷却
         if (plugin.getAIManager().isOnCooldown(player.getUniqueId())) {
             int remaining = plugin.getAIManager().getCooldownRemaining(player.getUniqueId());
-            player.sendMessage(plugin.colorize("&c请等待 " + remaining + " 秒后再使用 AI 助手！"));
+            player.sendMessage(plugin.msg("ai-cooldown", String.valueOf(remaining)));
             return true;
         }
 
@@ -87,7 +87,7 @@ public class AICommand implements CommandExecutor, TabCompleter {
         }
 
         if (userMessage.isEmpty()) {
-            sender.sendMessage(plugin.colorize("&c请输入要提问的内容！"));
+            sender.sendMessage(plugin.msg("ai-usage-empty"));
             return true;
         }
 
@@ -105,11 +105,11 @@ public class AICommand implements CommandExecutor, TabCompleter {
         plugin.getAIManager().incrementDailyUsage(player.getUniqueId());
 
         // 通知玩家请求已发送
-        player.sendMessage(plugin.colorize("&7AI 思考中，请稍候..."));
+        player.sendMessage(plugin.msg("ai-thinking"));
 
         // 如果公聊模式下，通知所有玩家
         if (plugin.getAIManager().isPublicReply()) {
-            Component publicNotice = plugin.colorize("&e" + player.getName() + " &7向 AI 提出了问题...");
+            Component publicNotice = plugin.msg("ai-public-notice", player.getName());
             for (Player online : Bukkit.getOnlinePlayers()) {
                 if (!online.equals(player)) {
                     online.sendMessage(publicNotice);
@@ -136,17 +136,17 @@ public class AICommand implements CommandExecutor, TabCompleter {
     }
 
     private void showHelp(CommandSender sender) {
-        sender.sendMessage(plugin.colorize("&6=== NekoChat AI 助手 ==="));
-        sender.sendMessage(plugin.colorize("&e/ai <消息> &7- 向 AI 提问"));
-        sender.sendMessage(plugin.colorize("&e/ai <提示词> <消息> &7- 使用指定提示词提问"));
+        sender.sendMessage(plugin.msg("ai-help-header"));
+        sender.sendMessage(plugin.msg("ai-help-usage"));
+        sender.sendMessage(plugin.msg("ai-help-prompt"));
         // 列出可用的自定义提示词
         Set<String> prompts = plugin.getAIManager().getPromptNames();
         if (!prompts.isEmpty()) {
-            sender.sendMessage(plugin.colorize("&7可用提示词: &e" + String.join("&7, &e", prompts)));
+            sender.sendMessage(plugin.msg("ai-help-available", String.join("&7, &e", prompts)));
         }
-        sender.sendMessage(plugin.colorize("&e@ai <消息> &7- 在聊天框直接 @ai 提问"));
-        sender.sendMessage(plugin.colorize("&e/nchat reload &7- 重载所有配置（含 AI）"));
-        sender.sendMessage(plugin.colorize("&8支持任何 OpenAI 兼容 API"));
+        sender.sendMessage(plugin.msg("ai-help-mention"));
+        sender.sendMessage(plugin.msg("ai-help-reload"));
+        sender.sendMessage(plugin.msg("ai-help-api"));
     }
 
     @Override

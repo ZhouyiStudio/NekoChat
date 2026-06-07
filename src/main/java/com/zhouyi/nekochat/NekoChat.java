@@ -13,6 +13,7 @@ import com.zhouyi.nekochat.listeners.ServerMessageListener;
 import com.zhouyi.nekochat.managers.AIManager;
 import com.zhouyi.nekochat.managers.CBanManager;
 import com.zhouyi.nekochat.managers.DatabaseManager;
+import com.zhouyi.nekochat.managers.MessageManager;
 import com.zhouyi.nekochat.managers.MuteManager;
 import com.zhouyi.nekochat.managers.OpManager;
 import com.zhouyi.nekochat.managers.TitleManager;
@@ -38,6 +39,7 @@ public class NekoChat extends JavaPlugin {
     private DatabaseManager databaseManager;
     private OpManager opManager;
     private AIManager aiManager;
+    private MessageManager messageManager;
     private MiniMessage miniMessage;
 
     // URL 正则（公开给其他类使用）
@@ -64,6 +66,7 @@ public class NekoChat extends JavaPlugin {
         this.databaseManager = new DatabaseManager(this);
         this.opManager = new OpManager(this);
         this.aiManager = new AIManager(this);
+        this.messageManager = new MessageManager(this);
 
         // 注册命令
         var ptitleCmd = getCommand("ptitle");
@@ -202,6 +205,21 @@ public class NekoChat extends JavaPlugin {
 
     public AIManager getAIManager() {
         return aiManager;
+    }
+
+    public MessageManager getMessageManager() {
+        return messageManager;
+    }
+
+    /**
+     * 快捷获取 messages.yml 中已格式化的彩色 Component
+     *
+     * @param key  消息键名
+     * @param args 占位符参数 {0} {1} ...
+     * @return 已解析颜色代码的 Component
+     */
+    public Component msg(String key, String... args) {
+        return messageManager.get(key, args);
     }
 
     /**

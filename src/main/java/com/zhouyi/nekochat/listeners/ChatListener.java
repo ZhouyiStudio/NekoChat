@@ -119,27 +119,27 @@ public class ChatListener implements Listener {
         // 提取 @ai 后的内容
         String content = plainText.trim().substring(3).trim();
         if (content.isEmpty()) {
-            player.sendMessage(plugin.colorize("&c用法: @ai <消息> 或 @ai <提示词> <消息>"));
+            player.sendMessage(plugin.msg("ai-prompt-hint"));
             return;
         }
 
         // 检查冷却
         if (plugin.getAIManager().isOnCooldown(player.getUniqueId())) {
             int remaining = plugin.getAIManager().getCooldownRemaining(player.getUniqueId());
-            player.sendMessage(plugin.colorize("&c请等待 " + remaining + " 秒后再使用 AI 助手！"));
+            player.sendMessage(plugin.msg("ai-cooldown", String.valueOf(remaining)));
             return;
         }
 
         // 检查 AI 封禁
         if (plugin.getAIManager().isAiBanned(player.getName())) {
-            player.sendMessage(plugin.colorize("&c你已被禁止使用 AI 助手！"));
+            player.sendMessage(plugin.msg("ai-banned"));
             return;
         }
 
         // 检查每日使用限制
         if (plugin.getAIManager().isDailyLimitReached(player.getUniqueId())) {
             int limit = plugin.getAIManager().getDailyLimit();
-            player.sendMessage(plugin.colorize("&c你今天使用 AI 已达上限（" + limit + "次），明天再试吧！"));
+            player.sendMessage(plugin.msg("ai-daily-limit", String.valueOf(limit)));
             return;
         }
 
@@ -161,7 +161,7 @@ public class ChatListener implements Listener {
         }
 
         if (userMessage.isEmpty()) {
-            player.sendMessage(plugin.colorize("&c请输入要提问的内容！"));
+            player.sendMessage(plugin.msg("ai-usage-empty"));
             return;
         }
 
@@ -171,13 +171,13 @@ public class ChatListener implements Listener {
 
         // 广播玩家的消息（@AI 部分显示为绿色）
         String displayName = plugin.getAIManager().getDisplayName();
-        String broadcastText = (promptHint != null)
-                ? "&e" + player.getName() + " &a@AI " + promptHint + " &f" + userMessage
-                : "&e" + player.getName() + " &a@AI &f" + userMessage;
-        Bukkit.broadcast(plugin.colorize(broadcastText));
+        Component broadcastText = (promptHint != null)
+                ? plugin.msg("ai-ai-mention-broadcast-with-prompt", player.getName(), promptHint, userMessage)
+                : plugin.msg("ai-ai-mention-broadcast", player.getName(), userMessage);
+        Bukkit.broadcast(broadcastText);
 
         // 通知提问者 AI 思考中
-        player.sendMessage(plugin.colorize("&7AI 思考中，请稍候..."));
+        player.sendMessage(plugin.msg("ai-thinking"));
 
         // 异步请求 AI
         plugin.getAIManager().askAI(player.getName(), userMessage, finalPrompt).thenAccept(response -> {
