@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public class CBanManager {
@@ -22,9 +23,15 @@ public class CBanManager {
     private static final Pattern IP_PATTERN = Pattern.compile(
             "\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b"
     );
-    // 域名正则 (匹配常见顶级域名)
+    // 域名正则（只匹配基本域名格式，TLD 用 HashSet 校验避免长交替回溯）
     private static final Pattern DOMAIN_PATTERN = Pattern.compile(
-            "\\b[a-zA-Z0-9.-]+\\.(?:com|net|org|me|io|xyz|top|cc|gg|fun|club|live|site|host|pro|info|online|world|vip|win|bid|cn|tk|ml|ga)\\b"
+            "\\b[a-zA-Z0-9.-]+\\.[a-z]{2,}\\b"
+    );
+    // 常见顶级域名（代替正则中的长交替组，避免回溯）
+    private static final Set<String> COMMON_TLDS = Set.of(
+            "com", "net", "org", "me", "io", "xyz", "top", "cc", "gg",
+            "fun", "club", "live", "site", "host", "pro", "info",
+            "online", "world", "vip", "win", "bid", "cn", "tk", "ml", "ga"
     );
 
     public CBanManager(NekoChat plugin) {
@@ -129,10 +136,17 @@ public class CBanManager {
             return ipMatcher.group();
         }
 
-        // 检测域名
+        // 检测域名（匹配到后用 Set 校验 TLD，避免正则回溯）
         var domainMatcher = DOMAIN_PATTERN.matcher(lower);
-        if (domainMatcher.find()) {
-            return domainMatcher.group();
+        while (domainMatcher.find()) {
+            String domain = domainMatcher.group();
+            int dotIdx = domain.lastIndexOf('.');
+            if (dotIdx >= 0) {
+                String tld = domain.substring(dotIdx + 1);
+                if (COMMON_TLDS.contains(tld)) {
+                    return domain;
+                }
+            }
         }
 
         return null;
