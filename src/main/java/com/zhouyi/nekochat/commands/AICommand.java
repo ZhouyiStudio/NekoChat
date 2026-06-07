@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -74,8 +75,31 @@ public class AICommand implements CommandExecutor, TabCompleter {
                     return true;
                 }
 
+                // 检查第一个词是否是自定义提示词
+                String firstWord = args[0].toLowerCase();
+                String promptName = plugin.getAIManager().getPrompt(firstWord);
+                String userMessage;
+                String finalPrompt = null;
+
+                if (promptName != null) {
+                    // 使用了自定义提示词
+                    finalPrompt = promptName;
+                    if (args.length > 1) {
+                        userMessage = message.substring(firstWord.length()).trim();
+                    } else {
+                        userMessage = "";
+                    }
+                } else {
+                    userMessage = message;
+                }
+
+                if (userMessage.isEmpty()) {
+                    player.sendMessage(plugin.colorize("&c请输入要提问的内容！"));
+                    return true;
+                }
+
                 // 发送 AI 请求
-                sendAIMessage(player, message);
+                sendAIMessage(player, userMessage, finalPrompt, firstWord);
                 return true;
             }
         }
@@ -84,7 +108,7 @@ public class AICommand implements CommandExecutor, TabCompleter {
     /**
      * 发送 AI 消息并处理回复
      */
-    private void sendAIMessage(Player player, String message) {
+    private void sendAIMessage(Player player, String message, String customPrompt, String promptHint) {
         // 记录冷却
         plugin.getAIManager().recordUsage(player.getUniqueId());
 
@@ -102,7 +126,7 @@ public class AICommand implements CommandExecutor, TabCompleter {
         }
 
         // 异步请求 AI
-        plugin.getAIManager().askAI(player.getName(), message).thenAccept(response -> {
+        plugin.getAIManager().askAI(player.getName(), message, customPrompt).thenAccept(response -> {
             // 回到主线程执行
             Bukkit.getScheduler().runTask(plugin, () -> {
                 String displayName = plugin.getAIManager().getDisplayName();
@@ -122,7 +146,14 @@ public class AICommand implements CommandExecutor, TabCompleter {
     private void showHelp(CommandSender sender) {
         sender.sendMessage(plugin.colorize("&6=== NekoChat AI 助手 ==="));
         sender.sendMessage(plugin.colorize("&e/ai <消息> &7- 向 AI 提问"));
+        sender.sendMessage(plugin.colorize("&e/ai <提示词> <消息> &7- 使用指定提示词提问"));
+        // 列出可用的自定义提示词
+        Set<String> prompts = plugin.getAIManager().getPromptNames();
+        if (!prompts.isEmpty()) {
+            sender.sendMessage(plugin.colorize("&7可用提示词: &e" + String.join("&7, &e", prompts)));
+        }
         sender.sendMessage(plugin.colorize("&e/ai reload &7- 重新加载 AI 配置（管理员）"));
+        sender.sendMessage(plugin.colorize("&e@ai <消息> &7- 在聊天框直接 @ai 提问"));
         sender.sendMessage(plugin.colorize("&8支持任何 OpenAI 兼容 API"));
     }
 
@@ -130,9 +161,13 @@ public class AICommand implements CommandExecutor, TabCompleter {
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                                                 @NotNull String alias, @NotNull String[] args) {
         if (args.length == 1) {
-            return Stream.of("reload")
-                    .filter(s -> s.startsWith(args[0].toLowerCase()))
-                    .collect(Collectors.toList());
+            // 提示: reload + 自定义提示词
+            Set<String> prompts = plugin.getAIManager().getPromptNames();
+            return Stream.concat(
+                    Stream.of("reload"),
+                    prompts.stream()
+            ).filter(s -> s.startsWith(args[0].toLowerCase()))
+             .collect(Collectors.toList());
         }
         return List.of();
     }

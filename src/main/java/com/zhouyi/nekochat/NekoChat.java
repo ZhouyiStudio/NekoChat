@@ -53,6 +53,9 @@ public class NekoChat extends JavaPlugin {
         // 保存默认配置
         saveDefaultConfig();
 
+        // 确保旧配置中包含 AI 配置段
+        ensureConfigSections();
+
         // 初始化管理器
         this.titleManager = new TitleManager(this);
         this.cbanManager = new CBanManager(this);
@@ -124,6 +127,45 @@ public class NekoChat extends JavaPlugin {
         getLogger().info("============================================================");
         getLogger().info("                    NekoChat 已禁用！");
         getLogger().info("============================================================");
+    }
+
+    /**
+     * 确保旧版本的 config.yml 包含 AI 配置段
+     * saveDefaultConfig() 只会在文件不存在时复制，已有旧配置不会自动新增
+     */
+    private void ensureConfigSections() {
+        var config = getConfig();
+        boolean changed = false;
+
+        if (!config.contains("ai")) {
+            config.set("ai.enabled", false);
+            config.set("ai.api-url", "https://api-inference.modelscope.cn/v1/chat/completions");
+            config.set("ai.api-key", "");
+            config.set("ai.model", "Qwen/Qwen2.5-7B-Instruct");
+            config.set("ai.system-prompt", "你是 NekoChat AI，一个 Minecraft 服务器中的智能助手。请用中文回复，回答简洁友好。每次回答不要太长。");
+            config.set("ai.max-tokens", 512);
+            config.set("ai.timeout-seconds", 30);
+            config.set("ai.cooldown-seconds", 20);
+            config.set("ai.public-reply", true);
+            config.set("ai.display-name", "&b[AI助手]");
+            config.set("ai.prompts.翻译", "你是一个翻译助手，请将用户的输入翻译成英文，只输出翻译结果。");
+            config.set("ai.prompts.笑话", "你是一个讲笑话的 AI，用中文讲一个简短有趣的笑话。");
+            config.set("ai.prompts.代码", "你是编程专家，用中文解释代码问题，给出简洁的代码示例。");
+            changed = true;
+        } else {
+            // 已有 ai 段，检查是否有 prompts 子段
+            if (!config.contains("ai.prompts")) {
+                config.set("ai.prompts.翻译", "你是一个翻译助手，请将用户的输入翻译成英文，只输出翻译结果。");
+                config.set("ai.prompts.笑话", "你是一个讲笑话的 AI，用中文讲一个简短有趣的笑话。");
+                config.set("ai.prompts.代码", "你是编程专家，用中文解释代码问题，给出简洁的代码示例。");
+                changed = true;
+            }
+        }
+
+        if (changed) {
+            saveConfig();
+            getLogger().info("§a[NekoChat] 已自动添加 AI 配置段到 config.yml");
+        }
     }
 
     public static NekoChat getInstance() {

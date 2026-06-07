@@ -1,10 +1,13 @@
 package com.zhouyi.nekochat.listeners;
 
 import com.zhouyi.nekochat.NekoChat;
+import com.zhouyi.nekochat.managers.AIManager;
 import com.zhouyi.nekochat.managers.DatabaseManager;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -60,7 +63,13 @@ public class ChatListener implements Listener {
             }
         }
 
-        // 4. 异步记录聊天到数据库
+        // 4. 检测 @ai / @AI 提及 → 触发 AI 助手
+        if (plugin.getAIManager().isEnabled() && AIManager.isAiMention(plainText)) {
+            handleAiMention(player, plainText, event);
+            return; // 事件已取消，直接返回
+        }
+
+        // 5. 异步记录聊天到数据库
         DatabaseManager db = plugin.getDatabaseManager();
         if (db.isEnabled()) {
             db.logPlayerChat(player.getName(), player.getUniqueId().toString(), plainText);
@@ -71,10 +80,10 @@ public class ChatListener implements Listener {
             plugin.getLogger().info("§7[NekoChat-DEBUG]§r 数据库未启用，跳过聊天记录保存: " + player.getName() + " -> " + plainText);
         }
 
-        // 5. 构建带颜色代码 + 可点击 URL 的消息组件
+        // 6. 构建带颜色代码 + 可点击 URL 的消息组件
         Component clickableMessage = plugin.processMessage(plainText);
 
-        // 5. 使用自定义渲染器：头衔 + 玩家名 + 可点击消息
+        // 6. 使用自定义渲染器：头衔 + 玩家名 + 可点击消息
         boolean hasTitle = plugin.getTitleManager().hasTitle(player);
         Component titleComponent = hasTitle
                 ? plugin.getTitleManager().getChatPrefix(player)
@@ -97,6 +106,71 @@ public class ChatListener implements Listener {
             }
 
             return base.append(clickableMessage);
+        });
+    }
+
+    /**
+     * 处理 @ai / @AI 触发 AI 助手的消息
+     */
+    private void handleAiMention(Player player, String plainText, AsyncChatEvent event) {
+        // 取消原始聊天事件
+        event.setCancelled(true);
+
+        // 提取 @ai 后的内容
+        String content = plainText.trim().substring(3).trim();
+        if (content.isEmpty()) {
+            player.sendMessage(plugin.colorize("&c用法: @ai <消息> 或 @ai <提示词> <消息>"));
+            return;
+        }
+
+        // 检查冷却
+        if (plugin.getAIManager().isOnCooldown(player.getUniqueId())) {
+            int remaining = plugin.getAIManager().getCooldownRemaining(player.getUniqueId());
+            player.sendMessage(plugin.colorize("&c请等待 " + remaining + " 秒后再使用 AI 助手！"));
+            return;
+        }
+
+        // 检查是否有自定义提示词（第一个词）
+        String[] parts = content.split(" ", 2);
+        String firstWord = parts[0].toLowerCase();
+        String promptContent = plugin.getAIManager().getPrompt(firstWord);
+        String userMessage;
+        String finalPrompt = null;
+        String promptHint = null;
+
+        if (promptContent != null) {
+            // 使用了自定义提示词
+            finalPrompt = promptContent;
+            promptHint = firstWord;
+            userMessage = (parts.length > 1) ? parts[1].trim() : "";
+        } else {
+            userMessage = content;
+        }
+
+        if (userMessage.isEmpty()) {
+            player.sendMessage(plugin.colorize("&c请输入要提问的内容！"));
+            return;
+        }
+
+        // 记录冷却
+        plugin.getAIManager().recordUsage(player.getUniqueId());
+
+        // 广播玩家的消息（@AI 部分显示为绿色）
+        String displayName = plugin.getAIManager().getDisplayName();
+        String broadcastText = (promptHint != null)
+                ? "&e" + player.getName() + " &a@AI " + promptHint + " &f" + userMessage
+                : "&e" + player.getName() + " &a@AI &f" + userMessage;
+        Bukkit.broadcast(plugin.colorize(broadcastText));
+
+        // 通知提问者 AI 思考中
+        player.sendMessage(plugin.colorize("&7AI 思考中，请稍候..."));
+
+        // 异步请求 AI
+        plugin.getAIManager().askAI(player.getName(), userMessage, finalPrompt).thenAccept(response -> {
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                Component replyMsg = plugin.colorize(displayName + "&r " + response);
+                Bukkit.broadcast(replyMsg);
+            });
         });
     }
 
