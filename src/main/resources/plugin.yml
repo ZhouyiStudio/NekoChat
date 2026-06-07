@@ -44,6 +44,10 @@ commands:
       /aiban <玩家>   - 禁止玩家使用 AI
       /aiban remove <玩家> - 解除封禁
       /aiban list     - 查看封禁列表
+  msg:
+    description: 发送私聊消息
+    usage: /msg <玩家> <消息>
+    aliases: [tell, w, whisper]
 
 permissions:
   nekochat.nchat:

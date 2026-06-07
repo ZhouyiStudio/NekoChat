@@ -8,6 +8,7 @@ import com.zhouyi.nekochat.commands.MuteCommand;
 import com.zhouyi.nekochat.commands.NChatCommand;
 import com.zhouyi.nekochat.commands.PTitleCommand;
 import com.zhouyi.nekochat.commands.UnmuteCommand;
+import com.zhouyi.nekochat.commands.WhisperCommand;
 import com.zhouyi.nekochat.listeners.ChatListener;
 import com.zhouyi.nekochat.listeners.ServerMessageListener;
 import com.zhouyi.nekochat.managers.AIManager;
@@ -115,6 +116,13 @@ public class NekoChat extends JavaPlugin {
         if (aibanCmd != null) {
             aibanCmd.setExecutor(new AIBanCommand(this));
             aibanCmd.setTabCompleter(new AIBanCommand(this));
+        }
+
+        var msgCmd = getCommand("msg");
+        if (msgCmd != null) {
+            var whisperExecutor = new WhisperCommand(this);
+            msgCmd.setExecutor(whisperExecutor);
+            msgCmd.setTabCompleter(whisperExecutor);
         }
 
         // 注册事件监听
