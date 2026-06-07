@@ -28,6 +28,9 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
       - name: Build with Gradle
         run: ./gradlew build
 
@@ -35,6 +38,7 @@ jobs:
         id: version
         shell: bash
         run: |
+          chmod +x gradlew
           VERSION=$(./gradlew -q properties 2>/dev/null | grep "^version:" | awk '{print $2}')
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
