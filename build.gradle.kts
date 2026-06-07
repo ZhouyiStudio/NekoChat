@@ -54,4 +54,10 @@ tasks {
             )
         }
     }
+
+    // 修复 paperweight 插件自动添加 -dev 后缀的问题
+    // 确保输出文件名格式为 NekoChat-<version>.jar
+    jar {
+        archiveFileName.set("NekoChat-${project.version}.jar")
+    }
 }
