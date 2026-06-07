@@ -32,7 +32,7 @@ public class NChatCommand implements CommandExecutor, TabCompleter {
         }
 
         switch (args[0].toLowerCase()) {
-            case "reload" -> handleReload(sender);
+            case "reload" -> handleReload(sender, args);
             case "op" -> handleOp(sender, args);
             default -> showHelp(sender);
         }
@@ -49,7 +49,8 @@ public class NChatCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(plugin.colorize("&e/mute <玩家> [时间] &7- 禁言玩家"));
         sender.sendMessage(plugin.colorize("&e/unmute <玩家> &7- 解除禁言"));
         sender.sendMessage(plugin.colorize("&e/nchat &7- 显示本帮助"));
-        sender.sendMessage(plugin.colorize("&e/nchat reload &7- 重新加载配置文件"));
+        sender.sendMessage(plugin.colorize("&e/nchat reload &7- 重载所有配置"));
+        sender.sendMessage(plugin.colorize("&e/nchat reload ai &7- 仅重载 AI 配置"));
         sender.sendMessage(plugin.colorize("&e/nchat op add <玩家> &7- 添加管理员"));
         sender.sendMessage(plugin.colorize("&e/nchat op remove <玩家> &7- 移除管理员"));
         sender.sendMessage(plugin.colorize("&e/nchat op list &7- 查看管理员列表"));
@@ -57,18 +58,28 @@ public class NChatCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(plugin.colorize("&8Author: &7Zhouyi"));
     }
 
-    private void handleReload(CommandSender sender) {
+    private void handleReload(CommandSender sender, String[] args) {
         if (!plugin.isAdmin(sender)) {
             sender.sendMessage(plugin.colorize("&c你没有权限执行此命令！"));
             return;
         }
 
+        // /nchat reload ai → 仅重载 AI 配置
+        if (args.length >= 2 && args[1].equalsIgnoreCase("ai")) {
+            plugin.reloadConfig();
+            plugin.getAIManager().reload();
+            sender.sendMessage(plugin.colorize("&aAI 配置已重新加载！"));
+            plugin.getLogger().info("§6[NekoChat]§r " + sender.getName() + " 重载了 AI 配置");
+            return;
+        }
+
+        // /nchat reload → 重载所有配置
         plugin.reloadConfig();
         plugin.getCBanManager().reload();
         plugin.getDatabaseManager().reload();
-
-        sender.sendMessage(plugin.colorize("&a配置文件已重新加载！"));
-        plugin.getLogger().info("§6[NekoChat]§r 管理员 " + sender.getName() + " 执行了重载");
+        plugin.getAIManager().reload();
+        sender.sendMessage(plugin.colorize("&a所有配置已重新加载！"));
+        plugin.getLogger().info("§6[NekoChat]§r 管理员 " + sender.getName() + " 执行了全量重载");
     }
 
     private void handleOp(CommandSender sender, String[] args) {
@@ -136,6 +147,14 @@ public class NChatCommand implements CommandExecutor, TabCompleter {
             return completions.stream()
                     .filter(s -> s.startsWith(args[0].toLowerCase()))
                     .collect(Collectors.toList());
+        }
+
+        if (args.length == 2 && args[0].equalsIgnoreCase("reload")) {
+            if (!plugin.isAdmin(sender)) return List.of();
+            if ("ai".startsWith(args[1].toLowerCase())) {
+                return List.of("ai");
+            }
+            return List.of();
         }
 
         if (args.length == 2 && args[0].equalsIgnoreCase("op")) {

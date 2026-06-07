@@ -2,9 +2,6 @@ package com.zhouyi.nekochat.commands;
 
 import com.zhouyi.nekochat.NekoChat;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -17,14 +14,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class AICommand implements CommandExecutor, TabCompleter {
 
     private final NekoChat plugin;
-
-    private static final String PREFIX = "&b[AI助手] ";
-    private static final String SEPARATOR = "&7&m----------------------------------------------------";
 
     public AICommand(NekoChat plugin) {
         this.plugin = plugin;
@@ -44,65 +37,50 @@ public class AICommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        // 处理子命令
-        switch (args[0].toLowerCase()) {
-            case "reload" -> {
-                // 只有管理员可以重载
-                if (!plugin.isAdmin(sender)) {
-                    sender.sendMessage(plugin.colorize("&c你没有权限执行此命令！"));
-                    return true;
-                }
-                plugin.reloadConfig();
-                plugin.getAIManager().reload();
-                sender.sendMessage(plugin.colorize("&aAI 配置已重新加载！"));
-                plugin.getLogger().info("§6[NekoChat]§r " + sender.getName() + " 重载了 AI 配置");
-                return true;
-            }
-            default -> {
-                // 只有玩家可以使用 /ai <消息>
-                if (!(sender instanceof Player player)) {
-                    sender.sendMessage(plugin.colorize("&c控制台不能直接发送 AI 消息，请使用 /ai reload"));
-                    return true;
-                }
+        // 拼装消息
+        String message = String.join(" ", args);
 
-                // 拼装消息
-                String message = String.join(" ", args);
-
-                // 检查冷却
-                if (plugin.getAIManager().isOnCooldown(player.getUniqueId())) {
-                    int remaining = plugin.getAIManager().getCooldownRemaining(player.getUniqueId());
-                    player.sendMessage(plugin.colorize("&c请等待 " + remaining + " 秒后再使用 AI 助手！"));
-                    return true;
-                }
-
-                // 检查第一个词是否是自定义提示词
-                String firstWord = args[0].toLowerCase();
-                String promptName = plugin.getAIManager().getPrompt(firstWord);
-                String userMessage;
-                String finalPrompt = null;
-
-                if (promptName != null) {
-                    // 使用了自定义提示词
-                    finalPrompt = promptName;
-                    if (args.length > 1) {
-                        userMessage = message.substring(firstWord.length()).trim();
-                    } else {
-                        userMessage = "";
-                    }
-                } else {
-                    userMessage = message;
-                }
-
-                if (userMessage.isEmpty()) {
-                    player.sendMessage(plugin.colorize("&c请输入要提问的内容！"));
-                    return true;
-                }
-
-                // 发送 AI 请求
-                sendAIMessage(player, userMessage, finalPrompt, firstWord);
-                return true;
-            }
+        // 控制台直接发送
+        if (!(sender instanceof Player player)) {
+            plugin.getAIManager().askAI("Console", message).thenAccept(response -> {
+                sender.sendMessage(plugin.colorize(response));
+            });
+            return true;
         }
+
+        // 检查冷却
+        if (plugin.getAIManager().isOnCooldown(player.getUniqueId())) {
+            int remaining = plugin.getAIManager().getCooldownRemaining(player.getUniqueId());
+            player.sendMessage(plugin.colorize("&c请等待 " + remaining + " 秒后再使用 AI 助手！"));
+            return true;
+        }
+
+        // 检查第一个词是否是自定义提示词
+        String firstWord = args[0].toLowerCase();
+        String promptName = plugin.getAIManager().getPrompt(firstWord);
+        String userMessage;
+        String finalPrompt = null;
+
+        if (promptName != null) {
+            // 使用了自定义提示词
+            finalPrompt = promptName;
+            if (args.length > 1) {
+                userMessage = message.substring(firstWord.length()).trim();
+            } else {
+                userMessage = "";
+            }
+        } else {
+            userMessage = message;
+        }
+
+        if (userMessage.isEmpty()) {
+            sender.sendMessage(plugin.colorize("&c请输入要提问的内容！"));
+            return true;
+        }
+
+        // 发送 AI 请求
+        sendAIMessage(player, userMessage, finalPrompt, firstWord);
+        return true;
     }
 
     /**
@@ -152,8 +130,8 @@ public class AICommand implements CommandExecutor, TabCompleter {
         if (!prompts.isEmpty()) {
             sender.sendMessage(plugin.colorize("&7可用提示词: &e" + String.join("&7, &e", prompts)));
         }
-        sender.sendMessage(plugin.colorize("&e/ai reload &7- 重新加载 AI 配置（管理员）"));
         sender.sendMessage(plugin.colorize("&e@ai <消息> &7- 在聊天框直接 @ai 提问"));
+        sender.sendMessage(plugin.colorize("&e/nchat reload &7- 重载所有配置（含 AI）"));
         sender.sendMessage(plugin.colorize("&8支持任何 OpenAI 兼容 API"));
     }
 
@@ -161,13 +139,11 @@ public class AICommand implements CommandExecutor, TabCompleter {
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                                                 @NotNull String alias, @NotNull String[] args) {
         if (args.length == 1) {
-            // 提示: reload + 自定义提示词
+            // 提示自定义提示词
             Set<String> prompts = plugin.getAIManager().getPromptNames();
-            return Stream.concat(
-                    Stream.of("reload"),
-                    prompts.stream()
-            ).filter(s -> s.startsWith(args[0].toLowerCase()))
-             .collect(Collectors.toList());
+            return prompts.stream()
+                    .filter(s -> s.startsWith(args[0].toLowerCase()))
+                    .collect(Collectors.toList());
         }
         return List.of();
     }

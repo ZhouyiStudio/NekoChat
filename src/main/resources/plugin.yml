@@ -28,7 +28,8 @@ commands:
     description: 显示插件帮助、重载配置或管理管理员
     usage: |
       /nchat          - 显示帮助
-      /nchat reload   - 重新加载配置文件
+      /nchat reload   - 重载所有配置（含 AI）
+      /nchat reload ai - 仅重载 AI 配置
       /nchat op add <玩家>    - 添加管理员
       /nchat op remove <玩家> - 移除管理员
       /nchat op list          - 查看管理员列表
@@ -36,7 +37,7 @@ commands:
     description: AI 助手（支持 OpenAI 兼容 API）
     usage: |
       /ai <消息>      - 向 AI 提问
-      /ai reload      - 重新加载 AI 配置
+      /ai <提示词> <消息> - 使用指定提示词提问
 
 permissions:
   nekochat.nchat:
